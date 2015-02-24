@@ -1,0 +1,43 @@
+Inspired by paper at:
+http://advances.sciencemag.org/content/1/1/e1400005
+where they look at the hiring network for CS, History, and Buisness.
+
+
+Functions to write:
+* Given an affiliation string, reduce it down to a simple unique identifier (e.g., 'Astronomy Dept, University of Washington, Box 23764, Seattle, WA' --> 'U Washington')
+* Construct a graph object out of a bunch of papers.
+* Trim graph down to only include papers by a single author
+* Given the trimmed graph, construct the movement from intitution to institution, and label each step (grad school, postdoc, postdoc, long-term (prob faculty)).
+* Need to re-write the matlab stuff in python:  http://tuvalu.santafe.edu/~aaronc/facultyhiring/
+
+*hmm, hard to tell how we can replicate the gender stuff.  Could try and guess a gender for each author.
+
+
+So I can do things in ADS labs like:
+bibstem:"PhDT." year:2010
+
+to get the list of phd's from a given year.
+
+1) So I'd like to go through and grab the name and affiliation of each thesis.
+1.5) chop down to only US institutions
+2) then for each name, do a search and compute h-index and publication years and affiliations.  record each year there's a change in affiliation.  Need to solve the problem of people with common names.  Make a graph object for each person--nodes are papers. Make edges between nodes that share identical co-authors, or identical year+institution.  Maybe edge for sharing N-uncommon words in title? Can use networkX and has_path. Looks like ADS already does some paper network stuff.  Pretty cool, but still tangles up some Williams, B. 
+
+Then we can run the MCMC to see how the institutions are related!
+Can also look at how different phD classes do for h-index distribution.
+Can look at # still publishing as a function of time and PhD class.
+
+Can compute an estimate of young researcher attrition as anyone who publishes only 2-6 years after their phd. 
+
+So fun things to find out:
+1) Can I just get a data-dump of the astronomy database?  Why not have anual data releases for crazy people like me? 2-million records can't be that big, especially if you strip out the abstract text.
+
+2) Is there a way to connect besides the web and the perl script?
+3) Any good tools for separating authors with the same name? Shouldn't it be possible to cloud-link these things together and find the group I want?
+
+
+-------
+things I'd like to see from the data:
+1) what's the ranking of different depts/observatories/labs? Any major changes over time?
+2) How long do people continue publishing after their phd? Can we see a change in the fraction of people leaving the field over time?
+
+another fun thing would be to look at h-index (or similar) as a function of time.  Is the long postdoc period necissary, or can we spot the productive astronomers early?
