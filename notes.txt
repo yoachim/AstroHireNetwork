@@ -1,6 +1,10 @@
 Inspired by paper at:
 http://advances.sciencemag.org/content/1/1/e1400005
 where they look at the hiring network for CS, History, and Buisness.
+http://www.wired.com/2015/02/academic-hiring-uphill-battle/
+http://tuvalu.santafe.edu/~aaronc/facultyhiring/
+http://www.wired.com/2015/02/infoporn-college-faculties-serious-diversity-problem/
+http://networkx.github.io/documentation/networkx-1.9.1/reference/algorithms.html
 
 
 Functions to write:
@@ -29,7 +33,7 @@ Can look at # still publishing as a function of time and PhD class.
 Can compute an estimate of young researcher attrition as anyone who publishes only 2-6 years after their phd. 
 
 So fun things to find out:
-1) Can I just get a data-dump of the astronomy database?  Why not have anual data releases for crazy people like me? 2-million records can't be that big, especially if you strip out the abstract text.
+1) Can I just get a data-dump of the astronomy database?  Why not have anual data releases for crazy people like me? 2-million records can't be that big, especially if you strip out the abstract text.--nope, publishers would never agree, but the API should be plenty!
 
 2) Is there a way to connect besides the web and the perl script?
 3) Any good tools for separating authors with the same name? Shouldn't it be possible to cloud-link these things together and find the group I want?
@@ -41,3 +45,54 @@ things I'd like to see from the data:
 2) How long do people continue publishing after their phd? Can we see a change in the fraction of people leaving the field over time?
 
 another fun thing would be to look at h-index (or similar) as a function of time.  Is the long postdoc period necissary, or can we spot the productive astronomers early?
+
+Another good thing to look at, what do the publication records of people look like when they get hired?  Need to be careful that we don't use a crazy h-index, but could even grab a list of names from the rumor wiki and then say what their record looked like right before they got hired.
+
+
+-----
+
+It occers to me a potentially faster way to do things would be to search by institution over a set of years, pull the authors publishing there, and then decide which of those are probably faculty...
+
+One of the possibly most painful parts will be converting affiliation strings to a simple affiliation.  Might just have to manually make a giant dict.
+
+Actually, not so bad b/c we can get all the universities from the phd affiliations.  That should make it pretty easy to start a dict that has keys of string snippet and values of institution:
+instituteDict = {'UCLA': 'UCLA',
+	         'Univerisity of California, Los Angeles': 'UCLA'
+		 'MIT': 'MIT'
+		 'Massachusets Institute of Technology':'MIT'}
+ObservatoryDict = {'Lowell':'Lowell',
+		   'Lick':'Lick',
+		   'KPNO':'KPNO',
+		   'Kitt Peak National Observatory':'KPNO',}
+		   
+
+
+
+------
+
+Got key:  in ~/.ads/dev_key
+
+Some handy examples of the ads API at:  https://github.com/adsabs/adsabs-dev-api
+
+For the hire network, just need name, phd institution, final instituiton
+
+But also want to get path (so we can see people at different times)
+
+So, after trimming down to the papers by an author:
+find the unique inst,year combinations.
+
+
+columns for US PhD Astronomers:
+ID, name, phd year, phd institution, 1st paper year, 1st 1st author paper year, last paper year, last 1st author year, h-index, Final institution, years at final inst.
+
+Maybe another table for institution full path?
+author ID, inst-1, inst-1 year start, inst-1 year end, inst0, inst0 year start, inst0 year end, ... inst7, inst7 
+
+
+How to take a search on author name and get the data I want:
+
+Search on name and 4(?) years after phd.  How to decide if paper belongs to the same author? Make a network, each paper is a node,
+ *link nodes if they share an affiliation within +/- a year
+ *link nodes if they share a co-author
+ * others? if they cite anything?
+Pull all the papers that connect to the thesis that started the seach
