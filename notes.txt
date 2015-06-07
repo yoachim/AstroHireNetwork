@@ -73,6 +73,7 @@ ObservatoryDict = {'Lowell':'Lowell',
 Got key:  in ~/.ads/dev_key
 
 Some handy examples of the ads API at:  https://github.com/adsabs/adsabs-dev-api
+clearly need to use the client app here:  https://github.com/andycasey/ads
 
 For the hire network, just need name, phd institution, final instituiton
 
