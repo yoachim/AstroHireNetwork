@@ -97,3 +97,9 @@ Search on name and 4(?) years after phd.  How to decide if paper belongs to the 
  *link nodes if they share a co-author
  * others? if they cite anything?
 Pull all the papers that connect to the thesis that started the seach
+
+So, as usual, ADS has a very nice "paper-network" tool for looking at links and groupings of papers:
+https://ui.adsabs.harvard.edu/#search/q=author%3A%22Yoachim%2C+P%22&sort=date+desc/paper-network
+so now I just need to figure out if the API will let me download that network, then I'm almost done!
+Then I don't have to roll my own silly graph network with networkX or anything https://networkx.github.io/index.html
+
