@@ -2,7 +2,7 @@ import numpy as np
 import ads
 import networkx as nx
 import numpy as np
-
+import difflib
 
 def authSimple(author):
     """
@@ -18,9 +18,9 @@ def authSimple(author):
     return result
 
 
-def authorGroup(articleList, articleNode):
+def authorGroup(articleList, anchorArticle):
     """
-    Given a list of articles, go through and find the ones that are connected to articleNode.
+    Given a list of articles, go through and find the ones that are connected to anchorArticle.
     """
     # so I can do article.references to get the list of ads.Article references.
     # Looking at http://adsabs.github.io/help/actions/visualize/#paper-network
@@ -29,10 +29,15 @@ def authorGroup(articleList, articleNode):
     # to find common elements of two lists:
     # common = set(b1) & set(b2)
 
-    if articleNode not in articleList:
-        articleList.append(articleNode)
+    if anchorArticle not in articleList:
+        articleList.append(anchorArticle)
 
+    # Use these as the nodes in the graph
     articleBibcodes = [article.bibcode for article in articleList]
+    # Make a handy dict for later:
+    bibcodeDict = {}
+    for article in articleList:
+        bibcodeDict[article.bibcode] = article
 
     # For each article, add an atribute that is a list of
     # bibcodes for that article's references
@@ -48,19 +53,37 @@ def authorGroup(articleList, articleNode):
     # Add the bibcodes as nodes
     paperGraph.add_node(articleBibcodes)
     nArticles = len(articleList)
-    for i in range(nArticles):
-        for j in range(nArticles-i-1)+i+1:
+    for i in range(nArticles-1):
+        for j in range(nArticles-i)+i+1:
             match = checkAuthorMatch(articleList[i], articleList[j])
             if match:
                 paperGraph.add_edge(articleList[i].bibcode,
                                     articleList[j].bibcode)
 
     # Find all the papers that are connected to the articleNode
-    #XXX
+    connectedPapers = nx.node_connected_component(paperGraph, anchorArticle)
+    # Now I have the bibcodes for all the papers that are connected
+    # to the anchorArticle
 
+    # Convert to a list of ads article objects to pass back
+    result = [bibcodeDict[paperbibcode] for paperbibcode in connectedPapers]
+
+    return result
+
+def affClean(aff):
+    """
+    Clean an affiliation name so that it doesn't have common words that might trigger a false match
+    """
+
+    genericWords = ['University', 'Department', 'Dept', 'Univ', 'Lab', 'Laboratory', 'Observatory']
+    result = aff
+    for word in genericWords:
+        result = result.replace(word,'')
+    return result
 
 def checkAuthorMatch(article1,article2,authorName=None,
-                     yearGap=2, nCommonRefs=5 ):
+                     yearGap=2, nCommonRefs=5,  nCommonAuths=3,
+                     matchThresh=0.70):
     """
     Check if two articles are probably from the same author.
 
@@ -70,6 +93,15 @@ def checkAuthorMatch(article1,article2,authorName=None,
     2) They share nCommonRefs or more
     or
     3) They share nCommonAuths or more
+
+    matchThresh sets the theshold for doing fuzzy string comparison with the
+    affiliation names (so, 'Univeristy of Washington' will match
+    'University of Washington, Astronomy Department'
+
+    returns
+    -------
+    bool
+
     """
     result = False
     # If any of the criteria match, return True and bail out
@@ -77,11 +109,28 @@ def checkAuthorMatch(article1,article2,authorName=None,
         authorName = authSimple(article1.author[0])
 
     # If published within yearGap from same location
-    if np.abs(int(artcle1.year)-int(article2.year)) <= yearGap:
-        if article1.aff == article2.aff:
-            return True
+    if np.abs(int(article1.year)-int(article2.year)) <= yearGap:
+        # XXX--need to do this for just the target author
+        aff1 = None
+        aff2 = None
+        for name, aff in zip(article1.author,article1.aff):
+            if authSimple(name) == authSimple(authorName):
+                aff1 = affClean(aff)
+        for name, aff in zip(article2.author,article2.aff):
+            if authSimple(name) == authSimple(authorName):
+                aff2 = affClean(aff)
+        if aff1 is not None:
+            # Use some fuzzy string comparison
+            if difflib.SequenceMatcher(None, aff1,aff2).ratio() > matchThresh:
+                return True
     # If they share nCommonRefs
-
+    if (hasattr(article1,'refbibcodes') & hasattr(article2,'refbibcodes')):
+        if len(article1.refbibcodes & article2.refbibcodes) >= nCommonRefs:
+            return True
+    # If they share nCommonAuths
+    commonAuthors = set(article1.author) & set(article2.author)
+    if len(commonAuthors) >= nCommonAuths:
+        return True
 
     return result
 
@@ -105,25 +154,27 @@ def authorsPapers(author, year=None):
     ack = list(ads.query(authors=author, year=year, database='astronomy', rows='all'))
     return ack
 
-# Year now
-maxYear = 2015
-# How many years pre-phd to search for papers
-yearsPrePhD = 7
 
-test = grabPhdClass(2002)
+def test1():
+    # Year now
+    maxYear = 2015
+    # How many years pre-phd to search for papers
+    yearsPrePhD = 7
 
-uwGrads = []
-for article in test:
-    if 'UNIVERSITY OF WASHINGTON' in article.aff[0]:
-        uwGrads.append(article)
+    test = grabPhdClass(2002)
 
-# can I do an author query with the
-article = uwGrads[-1]
-years = str(int(article.year)-yearsPrePhD)+'-%i'% maxYear
-paperList = authorsPapers(article.author[0], year=years)
+    uwGrads = []
+    for article in test:
+        if 'UNIVERSITY OF WASHINGTON' in article.aff[0]:
+            uwGrads.append(article)
 
-# Now, I need to go through the list and decide which ones belong to the PHD author
+    # can I do an author query with the
+    article = uwGrads[-1]
+    years = str(int(article.year)-yearsPrePhD)+'-%i'% maxYear
+    paperList = authorsPapers(article.author[0], year=years)
 
+
+myPapers = authorsPapers('Yoachim, P')
 
 # What do I want my final output to be?
 # (name, phd year, phd bibcode, phd.aff, latest paper bibcode, latest year, latest aff, latest 1st author bibcode, latest 1st year, latest 1st aff)
