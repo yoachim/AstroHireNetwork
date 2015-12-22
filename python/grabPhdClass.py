@@ -18,9 +18,11 @@ def authSimple(author):
     return result
 
 
-def authorGroup(articleList, anchorArticle):
+def authorGroup(articleList, anchorArticle, anchorAuthor):
     """
     Given a list of articles, go through and find the ones that are connected to anchorArticle.
+
+    Return the list of papers and the paper network graph that was constructed
     """
     # so I can do article.references to get the list of ads.Article references.
     # Looking at http://adsabs.github.io/help/actions/visualize/#paper-network
@@ -44,31 +46,32 @@ def authorGroup(articleList, anchorArticle):
     # and an atribute that is the set of authors
     # I should really make a dict, but it's sooo compact to just add atributes
     for article in articleList:
-        refs = article.refrences
+        refs = article.references
         article.refbibcodes = [ref.bibcode for ref in refs]
         article.authorSet = set([authSimple(author)  for author in article.author if (len(author) > 4)])
 
     # Create graph
     paperGraph = nx.Graph()
     # Add the bibcodes as nodes
-    paperGraph.add_node(articleBibcodes)
+    paperGraph.add_nodes_from(articleBibcodes)
     nArticles = len(articleList)
     for i in range(nArticles-1):
-        for j in range(nArticles-i)+i+1:
-            match = checkAuthorMatch(articleList[i], articleList[j])
+        for j in np.arange(nArticles-i)+i:
+            match = checkAuthorMatch(articleList[i], articleList[j],
+                                     authorName=anchorAuthor)
             if match:
                 paperGraph.add_edge(articleList[i].bibcode,
                                     articleList[j].bibcode)
 
     # Find all the papers that are connected to the articleNode
-    connectedPapers = nx.node_connected_component(paperGraph, anchorArticle)
+    connectedPapers = nx.node_connected_component(paperGraph, anchorArticle.bibcode)
     # Now I have the bibcodes for all the papers that are connected
     # to the anchorArticle
 
     # Convert to a list of ads article objects to pass back
     result = [bibcodeDict[paperbibcode] for paperbibcode in connectedPapers]
 
-    return result
+    return result, paperGraph
 
 def affClean(aff):
     """
@@ -80,6 +83,22 @@ def affClean(aff):
     for word in genericWords:
         result = result.replace(word,'')
     return result
+
+def checkAffMatch(aff1,aff2, matchThresh=0.70):
+    """
+    See if two affiliations are similar enough that we think they match
+    """
+    result = False
+    if aff1 == aff2:
+        return True
+    if difflib.SequenceMatcher(None, aff1,aff2).ratio() > matchThresh:
+        return True
+    if aff1 in aff2:
+        return True
+    if aff2 in aff1:
+        return True
+    return result
+
 
 def checkAuthorMatch(article1,article2,authorName=None,
                      yearGap=2, nCommonRefs=5,  nCommonAuths=3,
@@ -110,7 +129,6 @@ def checkAuthorMatch(article1,article2,authorName=None,
 
     # If published within yearGap from same location
     if np.abs(int(article1.year)-int(article2.year)) <= yearGap:
-        # XXX--need to do this for just the target author
         aff1 = None
         aff2 = None
         for name, aff in zip(article1.author,article1.aff):
@@ -120,15 +138,16 @@ def checkAuthorMatch(article1,article2,authorName=None,
             if authSimple(name) == authSimple(authorName):
                 aff2 = affClean(aff)
         if aff1 is not None:
-            # Use some fuzzy string comparison
-            if difflib.SequenceMatcher(None, aff1,aff2).ratio() > matchThresh:
+            if checkAffMatch(aff1,aff2,matchThresh=matchThresh):
                 return True
     # If they share nCommonRefs
     if (hasattr(article1,'refbibcodes') & hasattr(article2,'refbibcodes')):
-        if len(article1.refbibcodes & article2.refbibcodes) >= nCommonRefs:
+        if len(set(article1.refbibcodes) & set(article2.refbibcodes)) >= nCommonRefs:
             return True
     # If they share nCommonAuths
-    commonAuthors = set(article1.author) & set(article2.author)
+    commonAuthors = set([authSimple(auth) for auth in
+                         article1.author]) & set([authSimple(auth) for
+                                                  auth in article2.author])
     if len(commonAuthors) >= nCommonAuths:
         return True
 
@@ -160,8 +179,9 @@ def test1():
     maxYear = 2015
     # How many years pre-phd to search for papers
     yearsPrePhD = 7
+    phdYear = 2002
 
-    test = grabPhdClass(2002)
+    test = grabPhdClass(phdYear)
 
     uwGrads = []
     for article in test:
@@ -174,7 +194,12 @@ def test1():
     paperList = authorsPapers(article.author[0], year=years)
 
 
-myPapers = authorsPapers('Yoachim, P')
+name = 'Yoachim, P'
+myPapers = authorsPapers(name)
+# Try linking my publications
+mineLinked, myG = authorGroup(myPapers, myPapers[-1], name)
+years = [int(paper.year) for paper in mineLinked]
+nx.draw_spring(myG, node_color=years)
 
 # What do I want my final output to be?
-# (name, phd year, phd bibcode, phd.aff, latest paper bibcode, latest year, latest aff, latest 1st author bibcode, latest 1st year, latest 1st aff)
+# (name, phd year, phd bibcode, phd.aff, latest paper bibcode, latest year, latest aff, latest 1st author bibcode, latest 1st year, latest 1st aff, largest publication gap)
