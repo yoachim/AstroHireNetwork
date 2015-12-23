@@ -4,6 +4,26 @@ import networkx as nx
 import numpy as np
 import difflib
 
+def inAstroJ(toTest):
+    # Check if a list of publications includes at least one in
+    # an "astronomy journal".  Maybe also AAS or IAU meeting abstract.
+    if not hasattr(inAstro, journalList):
+        inAstro.journalList = [
+            'The Astrophysical Journal',
+            'The Astronomical Journal', #XXX-add more
+            ]
+
+    # If it's a string, just test it
+    if type(toTest) is str:
+        return toTest in inAstro.journalList
+    else:
+    # Else, loop through
+    for journal in toTest:
+        if journal in inAstro.journalList:
+            return True
+    return False
+
+
 def authSimple(author):
     """
     reduce a name string to Last, FI
@@ -87,15 +107,27 @@ def affClean(aff):
 def checkAffMatch(aff1,aff2, matchThresh=0.70):
     """
     See if two affiliations are similar enough that we think they match
+
+    Make them lower case so things will work since some affiliations
+    end up as all caps.
     """
     result = False
-    if aff1 == aff2:
+    # Bail out if either one is None
+    if aff1 is None:
+        return False
+    if aff2 is None:
+        return False
+    # Bail out if either one is a '-'
+    if (aff1 == '-') | (aff2 == '-'):
+        return False
+
+    if aff1.lower() == aff2.lower():
         return True
-    if difflib.SequenceMatcher(None, aff1,aff2).ratio() > matchThresh:
+    if difflib.SequenceMatcher(None, aff1.lower(),aff2.lower()).ratio() > matchThresh:
         return True
-    if aff1 in aff2:
+    if aff1.lower() in aff2.lower():
         return True
-    if aff2 in aff1:
+    if aff2.lower() in aff1.lower():
         return True
     return result
 
@@ -137,7 +169,7 @@ def checkAuthorMatch(article1,article2,authorName=None,
         for name, aff in zip(article2.author,article2.aff):
             if authSimple(name) == authSimple(authorName):
                 aff2 = affClean(aff)
-        if aff1 is not None:
+        if (aff1 is not None) & (aff2 is not None):
             if checkAffMatch(aff1,aff2,matchThresh=matchThresh):
                 return True
     # If they share nCommonRefs
@@ -170,7 +202,7 @@ def grabPhdClass(year):
     return ack
 
 def authorsPapers(author, year=None):
-    ack = list(ads.query(authors=author, year=year, database='astronomy', rows='all'))
+    ack = list(ads.query(authors=author, dates=year, database='astronomy', rows='all'))
     return ack
 
 
@@ -194,12 +226,16 @@ def test1():
     paperList = authorsPapers(article.author[0], year=years)
 
 
-name = 'Yoachim, P'
-myPapers = authorsPapers(name)
-# Try linking my publications
-mineLinked, myG = authorGroup(myPapers, myPapers[-1], name)
-years = [int(paper.year) for paper in mineLinked]
-nx.draw_spring(myG, node_color=years)
+def test2():
+    name = 'Yoachim, P'
+    myPapers = authorsPapers(name)
+    # Try linking my publications
+    mineLinked, myG = authorGroup(myPapers, myPapers[-1], name)
+    years = [int(paper.year) for paper in mineLinked]
+    nx.draw_spring(myG, node_color=years)
 
 # What do I want my final output to be?
 # (name, phd year, phd bibcode, phd.aff, latest paper bibcode, latest year, latest aff, latest 1st author bibcode, latest 1st year, latest 1st aff, largest publication gap)
+
+
+#XXX--ok, next up, test it on an author with a common name. Then start writing some I/O functions for

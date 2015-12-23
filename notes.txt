@@ -103,3 +103,10 @@ https://ui.adsabs.harvard.edu/#search/q=author%3A%22Yoachim%2C+P%22&sort=date+de
 so now I just need to figure out if the API will let me download that network, then I'm almost done!
 Then I don't have to roll my own silly graph network with networkX or anything https://networkx.github.io/index.html
 
+
+---------
+
+Fun way to spin the paper might be, ranking astro phd depts via where their grads end up (like the other paper), and then also by how fast their grads leave the field. I suspect they would be similar, but possibly different.
+
+
+Probably need to do some screening on making sure the author is actually an "astronomer", and not a kinda-related physics phd.  
