@@ -3,6 +3,25 @@ import ads
 import networkx as nx
 import numpy as np
 import difflib
+from datetime import date
+
+
+def checkUSAff(affil):
+    """
+    Check if an affiliation is in the USA.
+
+    returns
+    -------
+    bool
+    """
+    if not hasattr(checkUSAff,usinst):
+        checkUSAff.usinst = []# Make a list of USA astro phd institutions
+        checkUSAff.usinst = [aff.strip().lower() for aff in checkUSAff.usinst]
+
+    if affil.lower() in checkUSAff.usinst:
+        return True
+    else:
+        return False
 
 def inAstroJ(toTest):
     # Check if a list of publications includes at least one in
@@ -98,11 +117,12 @@ def affClean(aff):
     Clean an affiliation name so that it doesn't have common words that might trigger a false match
     """
 
-    genericWords = ['University', 'Department', 'Dept', 'Univ', 'Lab', 'Laboratory', 'Observatory']
-    result = aff
+    genericWords = ['of', 'the', 'University', 'Department', 'Dept',
+                    'Univ', 'Lab', 'Laboratory', 'Observatory',', ']
+    result = aff.lower()
     for word in genericWords:
-        result = result.replace(word,'')
-    return result
+        result = result.replace(word.lower(),'')
+    return result.strip()
 
 def checkAffMatch(aff1,aff2, matchThresh=0.70):
     """
@@ -121,19 +141,23 @@ def checkAffMatch(aff1,aff2, matchThresh=0.70):
     if (aff1 == '-') | (aff2 == '-'):
         return False
 
+    # If they just match
     if aff1.lower() == aff2.lower():
         return True
-    if difflib.SequenceMatcher(None, aff1.lower(),aff2.lower()).ratio() > matchThresh:
-        return True
+    # If one is contained in the other (e.g., 'Univ X' and 'Univ X, Anytown, ST, 876644')
     if aff1.lower() in aff2.lower():
         return True
     if aff2.lower() in aff1.lower():
         return True
+    # If they fuzzy compare to be close enough.
+    if difflib.SequenceMatcher(None, affClean(aff1),affClean(aff2).ratio() > matchThresh:
+        return True
+
     return result
 
 
 def checkAuthorMatch(article1,article2,authorName=None,
-                     yearGap=2, nCommonRefs=5,  nCommonAuths=3,
+                     yearGap=2, nCommonRefs=9,  nCommonAuths=3,
                      matchThresh=0.70):
     """
     Check if two articles are probably from the same author.
@@ -204,6 +228,79 @@ def grabPhdClass(year):
 def authorsPapers(author, year=None):
     ack = list(ads.query(authors=author, dates=year, database='astronomy', rows='all'))
     return ack
+
+def phdArticle2row(phdArticle, yearsPrePhD=7):
+    """
+    Take an ads article object and return a dict of information with keys:
+    [name, phd year, phd bibcode, phd.aff, latest paper bibcode, latest year,
+    latest aff, latest 1st author bibcode, latest 1st year, latest 1st aff,
+    largest publication gap]
+    """
+    result = {}
+    resultKeys = ['name', 'phd year', 'phd bibcode', 'phd aff',
+                  'latest year',
+                  'latest aff', 'latest 1st year',
+                  'latest 1st aff', 'largest publication gap',
+                  'noAstroJournal', 'nonUS']
+
+    maxYear = date.today().year
+    minYear = int(phdArticle.year) - yearsPrePhD
+    years = str(minYear)+'-%i'% maxYear
+
+    result['name'] = authSimple(phdArticle.author[0])
+    result['phd year'] = int(phdArticle)
+    result['phd aff'] = phdArtilce.aff[0]
+    result['phd bibcode'] = phdArticle.bibcode
+    result['phd aff'] = phdArticle.aff[0]
+
+    # Check that phd is from the US
+    if not checkUSAff(phdArticle.aff[0]):
+        result['nonUS'] = True
+        return result
+
+    # Query for all the papers by this author name
+    paperList = authorsPapers(article.author[0], year=years)
+
+    # Check that there's an astro paper in here
+    if not inAstroJ(paperList):
+        result['noAstroJournal'] = True
+        return result
+
+    # Find all the papers linked to the PHD in question
+    linkedPapers, linkedGraph = authorGroup(paperList, phdArticle,
+                                            authSimple(phdArticle.author[0]))
+
+    # Make sure there's still a publication in an astro journal
+    if not inAstroJ(linkedPapers):
+        result['noAstroJournal'] = True
+        return result
+
+    linkedYears = []
+    linked1stA = []
+    linked1stAYears = []
+    latestPaper = linkedPapers[0]
+    latest1stApaper = phdArticle
+
+    for paper in linkedPapers:
+        linkedYears.append(int(paper.year))
+        if int(paper.year) > int(latestPaper.year):
+            latestPaper = paper
+
+        if authSimple(paper.author[0]) == authSimple(phdArticle.author[0]):
+            linked1stA.append(paper)
+            linked1stAYears.append(int(paper.year))
+            if int(paper.year) > int(latest1stApaper):
+                latest1stApaper = paper
+
+    result['largest publication gap'] = np.max(np.diff(np.sort(linkedYears)))
+    result['latest year'] = int(latestPaper.year)
+    result['latest 1st year'] = int(latest1stApaper.year)
+
+    # Go through the papers and find a non-null recent affiliation
+    #XXX
+
+
+    return result
 
 
 def test1():
