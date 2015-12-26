@@ -3,8 +3,7 @@ import ads
 import networkx as nx
 import numpy as np
 import difflib
-from datetime import date
-
+import datetime
 
 def checkUSAff(affil):
     """
@@ -20,8 +19,10 @@ def checkUSAff(affil):
 
     if affil.lower() in checkUSAff.usinst:
         return True
-    else:
-        return False
+    for inst in checkUSAff.usinst:
+        if inst in affil.lower():
+            return True
+    return False
 
 def inAstroJ(toTest):
     # Check if a list of publications includes at least one in
@@ -37,9 +38,9 @@ def inAstroJ(toTest):
         return toTest in inAstro.journalList
     else:
     # Else, loop through
-    for journal in toTest:
-        if journal in inAstro.journalList:
-            return True
+        for journal in toTest:
+            if journal in inAstro.journalList:
+                return True
     return False
 
 
@@ -150,7 +151,7 @@ def checkAffMatch(aff1,aff2, matchThresh=0.70):
     if aff2.lower() in aff1.lower():
         return True
     # If they fuzzy compare to be close enough.
-    if difflib.SequenceMatcher(None, affClean(aff1),affClean(aff2).ratio() > matchThresh:
+    if difflib.SequenceMatcher(None, affClean(aff1),affClean(aff2)).ratio() > matchThresh:
         return True
 
     return result
@@ -243,7 +244,7 @@ def phdArticle2row(phdArticle, yearsPrePhD=7):
                   'latest 1st aff', 'largest publication gap',
                   'noAstroJournal', 'nonUS']
 
-    maxYear = date.today().year
+    maxYear = datetime.today().year
     minYear = int(phdArticle.year) - yearsPrePhD
     years = str(minYear)+'-%i'% maxYear
 
@@ -281,6 +282,10 @@ def phdArticle2row(phdArticle, yearsPrePhD=7):
     latestPaper = linkedPapers[0]
     latest1stApaper = phdArticle
 
+    latestAff = phdArticle.aff[0]
+    affDate = phdArticle.pubdate.split('-')
+    affDate = datetime.date(year=affDate[0], month=affDate[1], day=1)
+
     for paper in linkedPapers:
         linkedYears.append(int(paper.year))
         if int(paper.year) > int(latestPaper.year):
@@ -291,13 +296,22 @@ def phdArticle2row(phdArticle, yearsPrePhD=7):
             linked1stAYears.append(int(paper.year))
             if int(paper.year) > int(latest1stApaper):
                 latest1stApaper = paper
+        paperDate = paper.pubdate.split('-')
+        paperDate = datetime.date(paperDate[0], paperDate[1], 1)
+
+        if paperDate >= affDate:
+            for auth,aff in zip(paper.author, paper.aff):
+                if authSimple(auth) == authSimple(phdArticle.author[0]):
+                    if aff is not None:
+                        if len(aff) > 3:
+                            latestAff = aff
+                            affYear = int(paper.year)
+
 
     result['largest publication gap'] = np.max(np.diff(np.sort(linkedYears)))
     result['latest year'] = int(latestPaper.year)
     result['latest 1st year'] = int(latest1stApaper.year)
-
-    # Go through the papers and find a non-null recent affiliation
-    #XXX
+    result['latest aff'] = latestAff
 
 
     return result
