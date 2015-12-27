@@ -13,8 +13,8 @@ def checkUSAff(affil):
     -------
     bool
     """
-    if not hasattr(checkUSAff,usinst):
-        checkUSAff.usinst = []# Make a list of USA astro phd institutions
+    if not hasattr(checkUSAff,'usinst'):
+        checkUSAff.usinst = ['University of Washington']# XXX-add more# Make a list of USA astro phd institutions
         checkUSAff.usinst = [aff.strip().lower() for aff in checkUSAff.usinst]
 
     if affil.lower() in checkUSAff.usinst:
@@ -27,19 +27,19 @@ def checkUSAff(affil):
 def inAstroJ(toTest):
     # Check if a list of publications includes at least one in
     # an "astronomy journal".  Maybe also AAS or IAU meeting abstract.
-    if not hasattr(inAstro, journalList):
-        inAstro.journalList = [
-            'The Astrophysical Journal',
-            'The Astronomical Journal', #XXX-add more
-            ]
+    if not hasattr(inAstroJ, 'journalList'):
+        inAstroJ.journalList = ['Astronomy and Astrophysics',
+                                'The Astrophysical Journal',
+                                'The Astronomical Journal' #XXX-add more
+    ]
 
     # If it's a string, just test it
     if type(toTest) is str:
-        return toTest in inAstro.journalList
+        return toTest in inAstroJ.journalList
     else:
     # Else, loop through
         for journal in toTest:
-            if journal in inAstro.journalList:
+            if journal.pub in inAstroJ.journalList:
                 return True
     return False
 
@@ -236,6 +236,11 @@ def phdArticle2row(phdArticle, yearsPrePhD=7):
     [name, phd year, phd bibcode, phd.aff, latest paper bibcode, latest year,
     latest aff, latest 1st author bibcode, latest 1st year, latest 1st aff,
     largest publication gap]
+
+    Note:  Currently not making any cut based on peer-review. Thus, latest 1st author
+    paper could be a AAS poster, SPIE paper, arXive posting, etc.
+
+    XXX-consider pulling some metrics from ADS and putting them in the row.
     """
     result = {}
     resultKeys = ['name', 'phd year', 'phd bibcode', 'phd aff',
@@ -244,13 +249,13 @@ def phdArticle2row(phdArticle, yearsPrePhD=7):
                   'latest 1st aff', 'largest publication gap',
                   'noAstroJournal', 'nonUS']
 
-    maxYear = datetime.today().year
+    maxYear = datetime.date.today().year
     minYear = int(phdArticle.year) - yearsPrePhD
-    years = str(minYear)+'-%i'% maxYear
+    years = [minYear,maxYear] #range(minYear, maxYear+1) #str(minYear)+'-%i'% maxYear
 
     result['name'] = authSimple(phdArticle.author[0])
-    result['phd year'] = int(phdArticle)
-    result['phd aff'] = phdArtilce.aff[0]
+    result['phd year'] = int(phdArticle.year)
+    result['phd aff'] = phdArticle.aff[0]
     result['phd bibcode'] = phdArticle.bibcode
     result['phd aff'] = phdArticle.aff[0]
 
@@ -260,7 +265,7 @@ def phdArticle2row(phdArticle, yearsPrePhD=7):
         return result
 
     # Query for all the papers by this author name
-    paperList = authorsPapers(article.author[0], year=years)
+    paperList = authorsPapers(phdArticle.author[0], year=years)
 
     # Check that there's an astro paper in here
     if not inAstroJ(paperList):
@@ -284,7 +289,10 @@ def phdArticle2row(phdArticle, yearsPrePhD=7):
 
     latestAff = phdArticle.aff[0]
     affDate = phdArticle.pubdate.split('-')
-    affDate = datetime.date(year=affDate[0], month=affDate[1], day=1)
+    month = int(affDate[1])
+    if month < 1:
+        month = 1
+    affDate = datetime.date(year=int(phdArticle.year), month=month, day=1)
 
     for paper in linkedPapers:
         linkedYears.append(int(paper.year))
@@ -294,10 +302,12 @@ def phdArticle2row(phdArticle, yearsPrePhD=7):
         if authSimple(paper.author[0]) == authSimple(phdArticle.author[0]):
             linked1stA.append(paper)
             linked1stAYears.append(int(paper.year))
-            if int(paper.year) > int(latest1stApaper):
+            if int(paper.year) > int(latest1stApaper.year):
                 latest1stApaper = paper
-        paperDate = paper.pubdate.split('-')
-        paperDate = datetime.date(paperDate[0], paperDate[1], 1)
+        paperDate =int(paper.pubdate.split('-')[1])
+        if paperDate < 1:
+            paperDate = 1
+        paperDate = datetime.date(int(paper.year), paperDate, 1)
 
         if paperDate >= affDate:
             for auth,aff in zip(paper.author, paper.aff):
@@ -345,8 +355,6 @@ def test2():
     years = [int(paper.year) for paper in mineLinked]
     nx.draw_spring(myG, node_color=years)
 
-# What do I want my final output to be?
-# (name, phd year, phd bibcode, phd.aff, latest paper bibcode, latest year, latest aff, latest 1st author bibcode, latest 1st year, latest 1st aff, largest publication gap)
-
-
-#XXX--ok, next up, test it on an author with a common name. Then start writing some I/O functions for
+def testRow():
+    myphd = list(ads.query('bibcode:2007PhDT.........3Y', database='astronomy', rows='all'))[0]
+    phdArticle2row(myphd)
