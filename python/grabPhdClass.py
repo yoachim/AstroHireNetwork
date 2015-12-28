@@ -14,7 +14,8 @@ def checkUSAff(affil):
     bool
     """
     if not hasattr(checkUSAff,'usinst'):
-        checkUSAff.usinst = ['University of Washington']# XXX-add more# Make a list of USA astro phd institutions
+        checkUSAff.usinst = np.genfromtxt('simpleUSList.dat', dtype='|S50',
+                                          delimiter='$$', comments='#')
         checkUSAff.usinst = [aff.strip().lower() for aff in checkUSAff.usinst]
 
     if affil.lower() in checkUSAff.usinst:
