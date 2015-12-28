@@ -352,8 +352,13 @@ def test2():
     myPapers = authorsPapers(name)
     # Try linking my publications
     mineLinked, myG = authorGroup(myPapers, myPapers[-1], name)
-    years = [int(paper.year) for paper in mineLinked]
-    nx.draw_spring(myG, node_color=years)
+    years = [float(paper.year) for paper in myPapers]
+    nx.draw_spring(myG, node_color=np.array(years))
+
+    #figure out which ones are not linked
+    notLinked = [paper for paper in myPapers if paper not in mineLinked]
+    for paper in notLinked:
+        print paper
 
 def testRow():
     myphd = list(ads.query('bibcode:2007PhDT.........3Y', database='astronomy', rows='all'))[0]
