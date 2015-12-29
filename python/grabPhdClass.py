@@ -26,22 +26,40 @@ def checkUSAff(affil):
     return False
 
 def inAstroJ(toTest):
+    """
+    Demand that at at least one article be in an 'astronomy' venue.
+    """
     # Check if a list of publications includes at least one in
     # an "astronomy journal".  Maybe also AAS or IAU meeting abstract.
     if not hasattr(inAstroJ, 'journalList'):
-        inAstroJ.journalList = ['Astronomy and Astrophysics',
-                                'The Astrophysical Journal',
-                                'The Astronomical Journal' #XXX-add more
+        inAstroJ.journalList = ['Astronomy and Astrophysics', 'A&A',
+                                'Astrophysical Journal', 'AJ'
+                                'Astronomical Journal' 'ApJ',
+                                'Monthly Notices of the Royal Astronomical Society','MNRAS',
+                                'Icarus',
+                                'American Astronomical Society', 'AAS',
+                                'International Astronomical Union', 'IAU'
     ]
+        inAstroJ.journalList = [j.lower() for j in inAstroJ.journalList]
 
     # If it's a string, just test it
     if type(toTest) is str:
-        return toTest in inAstroJ.journalList
+        result = False
+        for journal in inAstroJ.journalList:
+            if journal in toTest.pub:
+                result = True
+        return result
     else:
-    # Else, loop through
-        for journal in toTest:
-            if journal.pub in inAstroJ.journalList:
-                return True
+        # The unique list of publication names
+        pubs = []
+        for article in toTest:
+            if hasattr(article, 'pub'):
+                pubs.append(article.pub.lower())
+                # XXX--wait, I can just merge all these together, no need to do a nested loop.
+        for pub in pubs:
+            for astroPub in inAstroJ.journalList:
+                if pub in astroPub:
+                    return True
     return False
 
 
@@ -211,14 +229,6 @@ def checkAuthorMatch(article1,article2,authorName=None,
 
     return result
 
-def usAffCheck(article):
-    """
-    check that the affiliation on an article is in the US
-    """
-    # Maybe do a split on ',' and '-' and only take the first part?
-    # make sure to compare in a case-insensitive way.
-
-
 def grabPhdClass(year):
     """
     Return a list of all the phd thesis from a given year
@@ -231,7 +241,7 @@ def authorsPapers(author, year=None):
     ack = list(ads.query(authors=author, dates=year, database='astronomy', rows='all'))
     return ack
 
-def phdArticle2row(phdArticle, yearsPrePhD=7):
+def phdArticle2row(phdArticle, yearsPrePhD=7, verbose=False):
     """
     Take an ads article object and return a dict of information with keys:
     [name, phd year, phd bibcode, phd.aff, latest paper bibcode, latest year,
@@ -243,12 +253,18 @@ def phdArticle2row(phdArticle, yearsPrePhD=7):
 
     XXX-consider pulling some metrics from ADS and putting them in the row.
     """
+    if verbose:
+        print 'searching for papers linked to:', phdArticle
+
+
     result = {}
     resultKeys = ['name', 'phd year', 'phd bibcode', 'phd aff',
                   'latest year',
                   'latest aff', 'latest 1st year',
                   'latest 1st aff', 'largest publication gap',
                   'noAstroJournal', 'nonUS']
+    for key in resultKeys:
+        result[key] = None
 
     maxYear = datetime.date.today().year
     minYear = int(phdArticle.year) - yearsPrePhD
@@ -263,23 +279,34 @@ def phdArticle2row(phdArticle, yearsPrePhD=7):
     # Check that phd is from the US
     if not checkUSAff(phdArticle.aff[0]):
         result['nonUS'] = True
+        if verbose:
+            print '%s does not test as a USA affiliation' % phdArticle.aff[0]
         return result
 
     # Query for all the papers by this author name
     paperList = authorsPapers(phdArticle.author[0], year=years)
 
+    if verbose:
+        print 'Found %i papers' % len(paperList)
+
     # Check that there's an astro paper in here
     if not inAstroJ(paperList):
         result['noAstroJournal'] = True
+        if verbose:
+            print 'Did not find an astro paper in results'
         return result
 
     # Find all the papers linked to the PHD in question
     linkedPapers, linkedGraph = authorGroup(paperList, phdArticle,
                                             authSimple(phdArticle.author[0]))
 
+    if verbose:
+        print 'Found %i papers linked to phd' % len(linkedPapers)
     # Make sure there's still a publication in an astro journal
     if not inAstroJ(linkedPapers):
         result['noAstroJournal'] = True
+        if verbose:
+            print 'Did not find an astro paper in linked results'
         return result
 
     linkedYears = []
@@ -346,6 +373,37 @@ def test1():
     article = uwGrads[-1]
     years = str(int(article.year)-yearsPrePhD)+'-%i'% maxYear
     paperList = authorsPapers(article.author[0], year=years)
+
+def test15():
+    """
+    Let's try to make some output
+    """
+    resultKeys = ['name', 'phd year', 'phd bibcode', 'phd aff',
+                  'latest year',
+                  'latest aff', 'latest 1st year',
+                  'latest 1st aff', 'largest publication gap',
+                  'noAstroJournal', 'nonUS']
+
+    f = open('test15out.dat', 'w')
+    phdYear = 2002
+    test = grabPhdClass(phdYear)
+    uwGrads = []
+    for article in test:
+        if 'UNIVERSITY OF WASHINGTON'.lower() in article.aff[0].lower():
+            uwGrads.append(article)
+
+    # Let's just crop down for a minute
+    ack = [uwGrads[0], uwGrads[-1], uwGrads[5], uwGrads[1]]
+    uwGrads = ack
+    for phd in uwGrads:
+        print 'Generating row for:', phd
+        row = phdArticle2row(phd, verbose=True)
+        out = ''
+        for key in resultKeys:
+            out += str(row[key])+', '
+        print >>f, out
+
+    f.close()
 
 
 def test2():
