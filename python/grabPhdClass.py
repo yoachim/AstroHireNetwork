@@ -4,6 +4,7 @@ import networkx as nx
 import numpy as np
 import difflib
 import datetime
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 def checkUSAff(affil):
     """
@@ -77,7 +78,7 @@ def authSimple(author):
     return result
 
 
-def authorGroup(articleList, anchorArticle, anchorAuthor):
+def authorGroup(articleList, anchorArticle, anchorAuthor, absMatchLimit=0.5):
     """
     Given a list of articles, go through and find the ones that are connected to anchorArticle.
 
@@ -105,19 +106,34 @@ def authorGroup(articleList, anchorArticle, anchorAuthor):
     # and an atribute that is the set of authors
     # I should really make a dict, but it's sooo compact to just add atributes
     for article in articleList:
-        refs = article.references
-        article.refbibcodes = [ref.bibcode for ref in refs]
-        article.authorSet = set([authSimple(author)  for author in article.author if (len(author) > 4)])
+    #    refs = article.references
+    #    article.refbibcodes = [ref.bibcode for ref in refs]
+        article.authorset = set([authSimple(author)  for author in article.author])
 
     # Create graph
     paperGraph = nx.Graph()
     # Add the bibcodes as nodes
     paperGraph.add_nodes_from(articleBibcodes)
     nArticles = len(articleList)
+
+    # Do the abstract analysis here to try and speed it up
+    abstracts = []
+    for paper in articleList:
+        if hasattr(paper,'abstract'):
+            abstracts.append(paper.abstract)
+        else:
+            abstracts.append('')
+    vect = TfidfVectorizer(min_df=1)
+    tfidf = vect.fit_transform(abstracts)
+    abstractArray = (tfidf * tfidf.T).A
+
     for i in range(nArticles-1):
         for j in np.arange(nArticles-i)+i:
-            match = checkAuthorMatch(articleList[i], articleList[j],
-                                     authorName=anchorAuthor)
+            if abstractArray[i][j] > absMatchLimit:
+                match = True
+            else:
+                match = checkAuthorMatch(articleList[i], articleList[j],
+                                         authorName=anchorAuthor)
             if match:
                 paperGraph.add_edge(articleList[i].bibcode,
                                     articleList[j].bibcode)
@@ -177,8 +193,9 @@ def checkAffMatch(aff1,aff2, matchThresh=0.70):
 
 
 def checkAuthorMatch(article1,article2,authorName=None,
-                     yearGap=2, nCommonRefs=9,  nCommonAuths=3,
-                     matchThresh=0.70):
+                     yearGap=2, nCommonAuths=3,
+                     matchThresh=0.70, absMatchLimit=0.5,
+                     titleMatchLimit=0.5):
     """
     Check if two articles are probably from the same author.
 
@@ -188,6 +205,8 @@ def checkAuthorMatch(article1,article2,authorName=None,
     2) They share nCommonRefs or more
     or
     3) They share nCommonAuths or more
+    or
+    4) Author lists are >1 and have the same names.
 
     matchThresh sets the theshold for doing fuzzy string comparison with the
     affiliation names (so, 'Univeristy of Washington' will match
@@ -200,8 +219,14 @@ def checkAuthorMatch(article1,article2,authorName=None,
     """
     result = False
     # If any of the criteria match, return True and bail out
+
     if authorName is None:
         authorName = authSimple(article1.author[0])
+
+    # If author list is >1 and identical
+    if len(article1.authorset) > 1:
+        if article1.authorset == article2.authorset:
+            return True
 
     # If published within yearGap from same location
     if np.abs(int(article1.year)-int(article2.year)) <= yearGap:
@@ -216,14 +241,9 @@ def checkAuthorMatch(article1,article2,authorName=None,
         if (aff1 is not None) & (aff2 is not None):
             if checkAffMatch(aff1,aff2,matchThresh=matchThresh):
                 return True
-    # If they share nCommonRefs
-    if (hasattr(article1,'refbibcodes') & hasattr(article2,'refbibcodes')):
-        if len(set(article1.refbibcodes) & set(article2.refbibcodes)) >= nCommonRefs:
-            return True
-    # If they share nCommonAuths
-    commonAuthors = set([authSimple(auth) for auth in
-                         article1.author]) & set([authSimple(auth) for
-                                                  auth in article2.author])
+
+    # Check if they have enough common authors
+    commonAuthors = article1.authorset.intersection(article2.authorset)
     if len(commonAuthors) >= nCommonAuths:
         return True
 
@@ -400,7 +420,7 @@ def test15():
         row = phdArticle2row(phd, verbose=True)
         out = ''
         for key in resultKeys:
-            out += str(row[key])+', '
+            out += str(row[key])+'; '
         print >>f, out
 
     f.close()
