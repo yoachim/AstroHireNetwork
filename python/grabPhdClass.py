@@ -261,7 +261,7 @@ def authorsPapers(author, year=None):
     ack = list(ads.query(authors=author, dates=year, database='astronomy', rows='all'))
     return ack
 
-def phdArticle2row(phdArticle, yearsPrePhD=7, verbose=False):
+def phdArticle2row(phdArticle, yearsPrePhD=7, verbose=False, justKeys=False):
     """
     Take an ads article object and return a dict of information with keys:
     [name, phd year, phd bibcode, phd.aff, latest paper bibcode, latest year,
@@ -283,6 +283,15 @@ def phdArticle2row(phdArticle, yearsPrePhD=7, verbose=False):
                   'latest aff', 'latest 1st year',
                   'latest 1st aff', 'largest publication gap',
                   'noAstroJournal', 'nonUS']
+
+    if justKeys:
+        result = ''
+        for key in resultKeys:
+            result += '; '+key
+        result = result[1:]
+        return result
+
+
     for key in resultKeys:
         result[key] = None
 
