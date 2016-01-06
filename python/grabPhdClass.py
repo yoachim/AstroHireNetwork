@@ -70,8 +70,12 @@ def authSimple(author):
     """
     result = ''
     if ',' in author:
-        temp = author.split(',')
-        result = temp[0]+', '+temp[1].strip()[0]
+        temp = author.replace(',,',',').split(',')
+        temp0 = temp[0]
+        temp1 = temp[1].strip()
+        if len(temp1) > 0:
+            temp1 = temp1[0]
+        result = temp0+', '+temp1
     else:
         temp = author.split(' ')
         result = temp[-1] + ', '+temp[0][0]
@@ -229,18 +233,19 @@ def checkAuthorMatch(article1,article2,authorName=None,
             return True
 
     # If published within yearGap from same location
-    if np.abs(int(article1.year)-int(article2.year)) <= yearGap:
-        aff1 = None
-        aff2 = None
-        for name, aff in zip(article1.author,article1.aff):
-            if authSimple(name) == authSimple(authorName):
-                aff1 = affClean(aff)
-        for name, aff in zip(article2.author,article2.aff):
-            if authSimple(name) == authSimple(authorName):
-                aff2 = affClean(aff)
-        if (aff1 is not None) & (aff2 is not None):
-            if checkAffMatch(aff1,aff2,matchThresh=matchThresh):
-                return True
+    if hasattr(article1,'year') & hasattr(article2,'year'):
+        if np.abs(int(article1.year)-int(article2.year)) <= yearGap:
+            aff1 = None
+            aff2 = None
+            for name, aff in zip(article1.author,article1.aff):
+                if authSimple(name) == authSimple(authorName):
+                    aff1 = affClean(aff)
+            for name, aff in zip(article2.author,article2.aff):
+                if authSimple(name) == authSimple(authorName):
+                    aff2 = affClean(aff)
+            if (aff1 is not None) & (aff2 is not None):
+                if checkAffMatch(aff1,aff2,matchThresh=matchThresh):
+                    return True
 
     # Check if they have enough common authors
     commonAuthors = article1.authorset.intersection(article2.authorset)
@@ -258,8 +263,13 @@ def grabPhdClass(year):
     return ack
 
 def authorsPapers(author, year=None):
-    ack = list(ads.query(authors=author, dates=year, database='astronomy', rows='all'))
-    return ack
+    # Getting a problem with large querie I think
+    try:
+        result = list(ads.query(authors=author, dates=year, database='astronomy', rows='all'))
+    except:
+        print 'failed to query author: %s' % author
+        result = []
+    return result
 
 def phdArticle2row(phdArticle, yearsPrePhD=7, verbose=False, justKeys=False):
     """
@@ -418,6 +428,7 @@ def test15():
             uwGrads.append(article)
 
     # Let's just crop down for a minute
+    print 'number of UW grads = %i' % len(uwGrads)
     ack = [uwGrads[0], uwGrads[-1], uwGrads[5], uwGrads[1]]
     uwGrads = ack
     for phd in uwGrads:
