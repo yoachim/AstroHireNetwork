@@ -285,11 +285,7 @@ def phdArticle2row(phdArticle, yearsPrePhD=7, verbose=False, justKeys=False):
                   'noAstroJournal', 'nonUS']
 
     if justKeys:
-        result = ''
-        for key in resultKeys:
-            result += '; '+key
-        result = result[1:]
-        return result
+        return resultKeys
 
 
     for key in resultKeys:

@@ -1,4 +1,5 @@
-from grabPhDClass import grabPhdClass, phdArticle2row
+#! /usr/bin/env python
+from grabPhdClass import grabPhdClass, phdArticle2row
 import os,argparse
 
 
@@ -13,14 +14,21 @@ if __name__ == '__main__':
     if not os.path.exists(outDir):
         os.makedirs(outDir)
 
-    f = open(os.path.join(outDir,str(year)+'.dat') )
+    f = open(os.path.join(outDir,str(args.year)+'.dat'),'w' )
 
-    header = phdArticle2row(None, justKeys=True)
+    resultKeys = phdArticle2row(None, justKeys=True)
+    header = ''
+    for key in resultKeys:
+        header += '; key'
+        header = header[2:]
+
     print >>f, header
 
-
+    print 'Querying for year %i' % args.year
     phdArticles = grabPhdClass(args.year)
-    for phdA in phdArticles:
+    print 'Found %i articles' % len(phdArticles)
+
+    for phd in phdArticles:
         print 'Generating row for:', phd
         row = phdArticle2row(phd, verbose=True)
         out = ''
