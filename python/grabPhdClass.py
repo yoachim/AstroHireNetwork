@@ -305,7 +305,7 @@ def phdArticle2row(phdArticle, yearsPrePhD=7, verbose=False, justKeys=False):
     if not checkUSAff(phdArticle.aff[0]):
         result['nonUS'] = True
         if verbose:
-            print '%s does not test as a USA affiliation' % phdArticle.aff[0]
+            print '%s does not test as a USA affiliation' % phdArticle.aff[0].encode('utf-8')
         return result
 
     # Query for all the papers by this author name
