@@ -1,0 +1,17 @@
+#Name; yearPhD; expectedLastYear;MoreExpected 
+'Yoachim, P';2007;2015;True
+
+
+testPerson('Moustakas, L', 1998) -- looks good
+testPerson('Moustakas, J', 2006) -- looks good
+testPerson('Bellm, E', 2011) --looks good
+testPerson('Davenport, J', 2015) -- not in there yet
+testPerson('Bird, J', 2012)-- looks good
+testPerson('Marshall, P', 2004) -- phd not in there?
+testPerson('Willett, K', 2011)--looks good
+ 
+testPerson('Kepely, A', 2009) -- dud?
+testPerson('Pagnotta, A', 2012) -- phD not in there?--should be, from LSU.
+testPerson('Simmons, B', 2012) -- looks good
+testPerson('Jenness, T', 1996) -- doesn't link up to things--missing affil info!
+testPerson('Walkowicz, L', 2008) -- looks good, says still at Berkeley though

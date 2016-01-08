@@ -271,7 +271,7 @@ def authorsPapers(author, year=None):
         result = []
     return result
 
-def phdArticle2row(phdArticle, yearsPrePhD=7, verbose=False, justKeys=False):
+def phdArticle2row(phdArticle, yearsPrePhD=7, verbose=False, checkUSA=True, justKeys=False, plot=False):
     """
     Take an ads article object and return a dict of information with keys:
     [name, phd year, phd bibcode, phd.aff, latest paper bibcode, latest year,
@@ -312,11 +312,12 @@ def phdArticle2row(phdArticle, yearsPrePhD=7, verbose=False, justKeys=False):
     result['phd aff'] = phdArticle.aff[0]
 
     # Check that phd is from the US
-    if not checkUSAff(phdArticle.aff[0]):
-        result['nonUS'] = True
-        if verbose:
-            print '%s does not test as a USA affiliation' % phdArticle.aff[0].encode('utf-8')
-        return result
+    if checkUSA:
+        if not checkUSAff(phdArticle.aff[0]):
+            result['nonUS'] = True
+            if verbose:
+                print '%s does not test as a USA affiliation' % phdArticle.aff[0].encode('utf-8')
+            return result
 
     # Query for all the papers by this author name
     paperList = authorsPapers(phdArticle.author[0], year=years)
@@ -334,6 +335,9 @@ def phdArticle2row(phdArticle, yearsPrePhD=7, verbose=False, justKeys=False):
     # Find all the papers linked to the PHD in question
     linkedPapers, linkedGraph = authorGroup(paperList, phdArticle,
                                             authSimple(phdArticle.author[0]))
+    if plot:
+        years = [float(paper.year) for paper in linkedPapers]
+        nx.draw_spring(linkedGraph)#, node_color=np.array(years))
 
     if verbose:
         print 'Found %i papers linked to phd' % len(linkedPapers)
@@ -442,8 +446,7 @@ def test15():
     f.close()
 
 
-def test2():
-    name = 'Yoachim, P'
+def test2(name='Yoachim, P'):
     myPapers = authorsPapers(name)
     # Try linking my publications
     mineLinked, myG = authorGroup(myPapers, myPapers[-1], name)
@@ -451,10 +454,24 @@ def test2():
     nx.draw_spring(myG, node_color=np.array(years))
 
     #figure out which ones are not linked
-    notLinked = [paper for paper in myPapers if paper not in mineLinked]
-    for paper in notLinked:
-        print paper
+    #notLinked = [paper for paper in myPapers if paper not in mineLinked]
+    #for paper in notLinked:
+    #    print paper
 
 def testRow():
     myphd = list(ads.query('bibcode:2007PhDT.........3Y', database='astronomy', rows='all'))[0]
     phdArticle2row(myphd)
+
+def testPerson(name, phdyear):
+    """
+    Test a random person and see if it gives the correct answer
+    """
+
+    phdA =  list(ads.query('bibstem:*PhDT', authors=name, dates=phdyear, database='astronomy', rows='all'))
+
+    result = phdArticle2row(phdA[0], checkUSA=False, verbose=True, plot=True)
+
+
+    print 'PhD Institution: %s' % result['phd aff']
+    print 'Latest Institution: %s' % result['latest aff']
+    print 'Last year: %i' % result['latest year']
