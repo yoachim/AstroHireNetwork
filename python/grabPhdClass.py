@@ -267,7 +267,7 @@ def authorsPapers(author, year=None):
     try:
         result = list(ads.query(authors=author, dates=year, database='astronomy', rows='all'))
     except:
-        print 'failed to query author: %s' % author
+        print 'failed to query author: %s' % author.encode('utf-8')
         result = []
     return result
 
