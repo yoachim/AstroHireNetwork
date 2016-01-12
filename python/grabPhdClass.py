@@ -82,7 +82,8 @@ def authSimple(author):
     return result
 
 
-def authorGroup(articleList, anchorArticle, anchorAuthor, absMatchLimit=0.5):
+def authorGroup(articleList, anchorArticle, anchorAuthor,
+                absMatchLimit=0.5, titleMatchLimit=0.6):
     """
     Given a list of articles, go through and find the ones that are connected to anchorArticle.
 
@@ -122,18 +123,31 @@ def authorGroup(articleList, anchorArticle, anchorAuthor, absMatchLimit=0.5):
 
     # Do the abstract analysis here to try and speed it up
     abstracts = []
+    titles = []
     for paper in articleList:
         if hasattr(paper,'abstract'):
             abstracts.append(paper.abstract)
         else:
             abstracts.append('')
+        if hasattr(paper,'title'):
+            titles.append(paper.title[0])
+        else:
+            titles.append('')
     vect = TfidfVectorizer(min_df=1)
     tfidf = vect.fit_transform(abstracts)
     abstractArray = (tfidf * tfidf.T).A
 
+    vect = TfidfVectorizer(min_df=1)
+    tfidf = vect.fit_transform(titles)
+    titleArray = (tfidf * tfidf.T).A
+
+
     for i in range(nArticles-1):
         for j in np.arange(nArticles-i)+i:
+            match = False
             if abstractArray[i][j] > absMatchLimit:
+                match = True
+            elif titleArray[i][j] > titleMatchLimit:
                 match = True
             else:
                 match = checkAuthorMatch(articleList[i], articleList[j],
