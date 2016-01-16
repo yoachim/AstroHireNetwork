@@ -11,7 +11,7 @@ def readYear(year, filename=None):
         filename = 'output/%i.dat' %year
     keys = phdArticle2row(None, justKeys=True)
     st='|S50'
-    types = [st,int,st,st,int,st,int,st,int,st,st]
+    types = [st,int,st,st,int,st,int,st,int,int,int,st,st]
     data = np.genfromtxt(filename, delimiter=';; ', skip_header=1,
                          dtype=zip(keys,types))
 
@@ -54,19 +54,21 @@ if __name__ == '__main__':
     print 'Removed already run bibcodes and have %i left' % len(phdArticles)
 
     for phd in phdArticles:
-        print 'Generating row for:', phd
-        row = phdArticle2row(phd, verbose=True)
-        out = u''
-        for key in resultKeys:
-            if (type(row[key]) == str) | (type(row[key]) == type(u'unicode')):
-                temp = row[key].encode('utf-8')
-            else:
-                temp = str(row[key])
-            try:
-                out += temp+';; '
-            except:
-                out += 'garblegarblestring ;; '
-        out = out[:-3]
-        print >>f, out
+        if hasattr(phd,'year'):
+            print 'Generating row for:', phd
+            row = phdArticle2row(phd, verbose=True)
+            row.replace('#','') #  Strip out unintended comment symbols
+            out = u''
+            for key in resultKeys:
+                if (type(row[key]) == str) | (type(row[key]) == type(u'unicode')):
+                    temp = row[key].encode('utf-8')
+                else:
+                    temp = str(row[key])
+                try:
+                    out += temp+';; '
+                except:
+                    out += 'garblegarblestring ;; '
+            out = out[:-3]
+            print >>f, out
 
     f.close()

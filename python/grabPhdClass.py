@@ -306,6 +306,7 @@ def phdArticle2row(phdArticle, yearsPrePhD=7, verbose=False, checkUSA=True, just
                   'latest year',
                   'latest aff', 'latest 1st year',
                   'latest 1st aff', 'largest publication gap',
+                  'numRecords','numLinked',
                   'noAstroJournal', 'nonUS']
 
     if justKeys:
@@ -325,6 +326,7 @@ def phdArticle2row(phdArticle, yearsPrePhD=7, verbose=False, checkUSA=True, just
     result['phd bibcode'] = phdArticle.bibcode
     result['phd aff'] = phdArticle.aff[0]
 
+
     # Check that phd is from the US
     if checkUSA:
         if not checkUSAff(phdArticle.aff[0]):
@@ -339,6 +341,7 @@ def phdArticle2row(phdArticle, yearsPrePhD=7, verbose=False, checkUSA=True, just
     if verbose:
         print 'Found %i papers' % len(paperList)
 
+    result['numRecords'] = len(paperList)
     # Check that there's an astro paper in here
     if not inAstroJ(paperList):
         result['noAstroJournal'] = True
@@ -349,6 +352,7 @@ def phdArticle2row(phdArticle, yearsPrePhD=7, verbose=False, checkUSA=True, just
     # Find all the papers linked to the PHD in question
     linkedPapers, linkedGraph = authorGroup(paperList, phdArticle,
                                             authSimple(phdArticle.author[0]))
+    result['numLinked'] = len(linkedPapers)
     if plot:
         years = [float(paper.year) for paper in linkedPapers]
         nx.draw_spring(linkedGraph)#, node_color=np.array(years))
