@@ -57,7 +57,6 @@ if __name__ == '__main__':
         if hasattr(phd,'year'):
             print 'Generating row for:', phd
             row = phdArticle2row(phd, verbose=True)
-            row.replace('#','') #  Strip out unintended comment symbols
             out = u''
             for key in resultKeys:
                 if (type(row[key]) == str) | (type(row[key]) == type(u'unicode')):
@@ -69,6 +68,7 @@ if __name__ == '__main__':
                 except:
                     out += 'garblegarblestring ;; '
             out = out[:-3]
+            out.replace('#','') #  Strip out unintended comment symbols
             print >>f, out
 
     f.close()
