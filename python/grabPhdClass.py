@@ -306,7 +306,7 @@ def phdArticle2row(phdArticle, yearsPrePhD=7, verbose=False, checkUSA=True, just
                   'latest year',
                   'latest aff', 'latest 1st year',
                   'latest 1st aff', 'largest publication gap',
-                  'numRecords','numLinked',
+                  'numRecords','numLinked', 'uniqueName', 'latest year unlinked',
                   'noAstroJournal', 'nonUS']
 
     if justKeys:
@@ -408,6 +408,18 @@ def phdArticle2row(phdArticle, yearsPrePhD=7, verbose=False, checkUSA=True, just
     result['latest 1st year'] = int(latest1stApaper.year)
     result['latest aff'] = latestAff
 
+    allYears = [int(paper.year) for paper in paperList]
+    result['latest year unlinked'] = np.max(allYears)
+
+    # Test to see if this is the only person with this name and a phd in astro
+    ack = list(ads.query('bibstem:"*PhDT", author:"%s"' % authSimple(phdArticle.author[0]),
+                         database='astronomy'))
+    if len(ack) > 1:
+        if verbose:
+            print authSimple(phdArticle.author[0])+' returns multiple PhDT.'
+        result['uniqueName'] = False
+    else:
+        result['uniqueName'] = True
 
     return result
 
