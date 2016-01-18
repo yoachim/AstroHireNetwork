@@ -380,9 +380,10 @@ def phdArticle2row(phdArticle, yearsPrePhD=7, verbose=False, checkUSA=True, just
     affDate = datetime.date(year=int(phdArticle.year), month=month, day=1)
 
     for paper in linkedPapers:
-        linkedYears.append(int(paper.year))
-        if int(paper.year) > int(latestPaper.year):
-            latestPaper = paper
+        if hasattr(paper, 'year'):
+            linkedYears.append(int(paper.year))
+            if int(paper.year) > int(latestPaper.year):
+                latestPaper = paper
 
         if authSimple(paper.author[0]) == authSimple(phdArticle.author[0]):
             linked1stA.append(paper)
@@ -392,15 +393,16 @@ def phdArticle2row(phdArticle, yearsPrePhD=7, verbose=False, checkUSA=True, just
         paperDate =int(paper.pubdate.split('-')[1])
         if paperDate < 1:
             paperDate = 1
-        paperDate = datetime.date(int(paper.year), paperDate, 1)
+        if hasattr(paper,'year'):
+            paperDate = datetime.date(int(paper.year), paperDate, 1)
 
-        if paperDate >= affDate:
-            for auth,aff in zip(paper.author, paper.aff):
-                if authSimple(auth) == authSimple(phdArticle.author[0]):
-                    if aff is not None:
-                        if len(aff) > 3:
-                            latestAff = aff
-                            affYear = int(paper.year)
+            if paperDate >= affDate:
+                for auth,aff in zip(paper.author, paper.aff):
+                    if authSimple(auth) == authSimple(phdArticle.author[0]):
+                        if aff is not None:
+                            if len(aff) > 3:
+                                latestAff = aff
+                                affYear = int(paper.year)
 
 
     result['largest publication gap'] = np.max(np.diff(np.sort(linkedYears)))
@@ -408,7 +410,7 @@ def phdArticle2row(phdArticle, yearsPrePhD=7, verbose=False, checkUSA=True, just
     result['latest 1st year'] = int(latest1stApaper.year)
     result['latest aff'] = latestAff
 
-    allYears = [int(paper.year) for paper in paperList]
+    allYears = [int(paper.year) for paper in paperList if hasattr(paper,'year')]
     result['latest year unlinked'] = np.max(allYears)
 
     # Test to see if this is the only person with this name and a phd in astro
