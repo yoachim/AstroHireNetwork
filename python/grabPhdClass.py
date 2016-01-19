@@ -387,9 +387,10 @@ def phdArticle2row(phdArticle, yearsPrePhD=7, verbose=False, checkUSA=True, just
 
         if authSimple(paper.author[0]) == authSimple(phdArticle.author[0]):
             linked1stA.append(paper)
-            linked1stAYears.append(int(paper.year))
-            if int(paper.year) > int(latest1stApaper.year):
-                latest1stApaper = paper
+            if hasattr(paper, 'year'):
+                linked1stAYears.append(int(paper.year))
+                if int(paper.year) > int(latest1stApaper.year):
+                    latest1stApaper = paper
         paperDate =int(paper.pubdate.split('-')[1])
         if paperDate < 1:
             paperDate = 1
