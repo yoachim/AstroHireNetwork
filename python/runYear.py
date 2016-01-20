@@ -13,7 +13,7 @@ def readYear(year, filename=None):
     st='|S50'
     types = [st,int,st,st,int,st,int,st,int,int,int,st,int,st,st]
     data = np.genfromtxt(filename, delimiter=';; ', skip_header=1,
-                         dtype=zip(keys,types))
+                         dtype=zip(keys,types), comments=None)
 
     return data
 
