@@ -285,7 +285,8 @@ def authorsPapers(author, year=None):
         result = []
     return result
 
-def phdArticle2row(phdArticle, yearsPrePhD=7, verbose=False, checkUSA=True, justKeys=False, plot=False):
+def phdArticle2row(phdArticle, yearsPrePhD=7, verbose=False, checkUSA=True,
+                   justKeys=False, plot=False, returnNetwork=False, returnLinkedPapers=False):
     """
     Take an ads article object and return a dict of information with keys:
     [name, phd year, phd bibcode, phd.aff, latest paper bibcode, latest year,
@@ -352,6 +353,8 @@ def phdArticle2row(phdArticle, yearsPrePhD=7, verbose=False, checkUSA=True, just
     # Find all the papers linked to the PHD in question
     linkedPapers, linkedGraph = authorGroup(paperList, phdArticle,
                                             authSimple(phdArticle.author[0]))
+    if returnLinkedPapers:
+        return linkedPapers
     result['numLinked'] = len(linkedPapers)
     if plot:
         years = [float(paper.year) for paper in linkedPapers]
@@ -424,6 +427,8 @@ def phdArticle2row(phdArticle, yearsPrePhD=7, verbose=False, checkUSA=True, just
     else:
         result['uniqueName'] = True
 
+    if returnNetwork:
+        return result, linkedGraph
     return result
 
 
@@ -508,3 +513,22 @@ def testPerson(name, phdyear):
     print 'PhD Institution: %s' % result['phd aff']
     print 'Latest Institution: %s' % result['latest aff']
     print 'Last year: %i' % result['latest year']
+
+def testOverlap():
+    """
+    See if there is any overlap betwen linked list for two identical authors
+    """
+
+    name = 'Williams, B'
+    year = 2002
+    phd1 =  list(ads.query('bibstem:*PhDT', authors=name, dates=year,
+                               database='astronomy', rows='all'))[0]
+    year = 2010
+    phd2 = list(ads.query('bibstem:*PhDT', authors=name, dates=year,
+                               database='astronomy', rows='all'))[0]
+
+    list1 = phdArticle2row(phd1, returnLinkedPapers=True)
+    list2 = phdArticle2row(phd2, returnLinkedPapers=True)
+
+    overlap = list(set(list1).intersection(list2))
+    print 'number of overlap papers in linked lists = %i' % len(overlap)

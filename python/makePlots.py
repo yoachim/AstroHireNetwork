@@ -4,6 +4,24 @@ from runYear import readYear
 import glob
 import matplotlib.pylab as plt
 import argparse as arg
+import networkx as nx
+import ads
+from grabPhdClass import phdArticle2row
+
+def exampleNetworks():
+    names = ['Yoachim, P', 'Bellm, E', 'Williams, B', 'Williams, B' ]
+    years = [2007, 2011, 2002, 2010]
+    count = 1
+    for name,year in zip(names,years):
+        phdA =  list(ads.query('bibstem:*PhDT', authors=name, dates=year,
+                               database='astronomy', rows='all'))
+
+        result,graph = phdArticle2row(phdA[0], checkUSA=False, verbose=True, returnNetwork=True)
+        nx.draw_spring(graph)
+        plt.savefig('../plots/example_network_%i.pdf' %count )
+        count += 1
+        plt.close('all')
+        print result
 
 
 def curvePlot(data,good, filename, title):
@@ -50,6 +68,7 @@ def curvePlot(data,good, filename, title):
     ax.legend()
     ax.set_title(title)
     fig.savefig(filename)
+    plt.close(fig)
 
 
 def makePlots(plot1=False, plot2=False, plot3=False, plot4=False):
@@ -114,9 +133,11 @@ if __name__ == '__main__':
     parser.add_argument('--plot2', dest='plot2', action='store_true')
     parser.add_argument('--plot3', dest='plot3', action='store_true')
     parser.add_argument('--plot4', dest='plot4', action='store_true')
+    parser.add_argument('--network', dest='network', action='store_true')
+
 
     parser.set_defaults(plot1=False,plot2=False,plot3=False,
-                        plot4=False)
+                        plot4=False, network=False)
 
     args = parser.parse_args()
 
@@ -124,3 +145,6 @@ if __name__ == '__main__':
               plot2=args.plot2,
               plot3=args.plot3,
               plot4=args.plot4)
+
+    if args.network:
+        exampleNetworks()

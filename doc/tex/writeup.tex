@@ -64,14 +64,14 @@ Our procedure for building a database of Astronomy and Astrophysics PhDs is as f
 
 For each US PhD, we then query ADS for all entries with the PhD author's last name and first initial with a date limit of 7 years pre-PhD to the present (Jan 2016).
 
-For common names (e.g., Jones, R and Williams, B), our author query returns entries from multiple authors.  To try and restrict the results to only those papers with the same author as the PhD thesis, we construct a network graph.
+For common names (e.g., Jones, R and Williams, B), our author query returns entries from multiple authors.  To try and restrict the results to only those papers with the same author as the PhD thesis, we construct a network graph using \citet{networkx}.
 
 Every ADS entry is a node in our network. We draw an edge between nodes if they meet any of the following criteria:
 \begin{itemize}
 \item{If the affiliation of the thesis author matches, and the year of the entry is within 2 years. XXX-describe affil match fuzzy string, plus if one string is contained in the other.}
 \item{If the entries have 3 or more authors in common in their author lists.}
 \item{If there are two authors and they are identical on the two entries.}
-\item{If the information contained in the abstracts are similar enough as measured by XXX-magic fucking black boxXXX TfidfVectorizer}
+\item{If the information contained in the abstracts are similar enough as measured by XXX-magic fucking black boxXXX TfidfVectorizer from \citet{scikit-learn}}
   \item{If the information contained in the titles of the entries are similar enough.}
 \end{itemize}
 
@@ -92,10 +92,18 @@ One known issue is that ADS does not contain all Astronomy PhD dissertations. We
 
 Plots to make:
 \begin{itemize}
-\item{Example paper clouds}
-\item{number of US astro phds per year}
-  \item{retention curve - retention curve for unique name}
+\item{Do my tests for over-linking and under-linking using unique names.}
 \end{itemize}
+
+
+\begin{figure*}
+  \plottwo{../../plots/example_network_1.pdf}{../../plots/example_network_2.pdf}\\
+    \plottwo{../../plots/example_network_3.pdf}{../../plots/example_network_4.pdf}
+        \caption{Examples of network graphs constructed to find papers linked to individual PhD thesis entries in ADS.   Top Left: Network of ADS entries with the same author as \citet{Yoachim07} (45 entries, 43 linked to the PhD), Top Right: Network for \citet{Bellm2011} (103 entries, 97 linked), Bottom Left: Network for \citet{Williams02}, (313 papers, 268 linked) Bottom Right: Network for \citet{Williams11} (157 papers, 111 linked).  Note, none of the linked papers for the two Williams PhDs overlap. \label{fig:example_networks}}
+\end{figure*}
+
+% Do any of those Williams papers overlap? NO not a one! Wow. Must be using middle initials.
+
 
 
 
@@ -124,9 +132,27 @@ It is worth emphasizing that while there are undoubtably some cases where we hav
 To test how much we are affected by over-linking ADS entries, we compare the retention curves of all astronomers to those with unique PhD names.  xxx-should also then take the unique names and see how it changes if I use the last entry rather than the last linked entry.
 
 
+\begin{figure}
+  \plotone{../../plots/phdsperyear.pdf}
+  \caption{Number of US Astronomy PhD thesis entries found in ADS per year. \label{fig:phdperyear}}
+\end{figure}
+
+\begin{figure}
+  \plotone{../../plots/active_curves.pdf}
+  \plotone{../../plots/active_curves_uname.pdf}
+  \caption{ \label{fig:active_curves}}
+  \end{figure}
+
+
+\begin{figure}
+  \plotone{../../plots/retention_by_class.pdf}
+  \caption{The 4, 6, and 10 year retention fractions as a function of PhD cohort year.\label{fig:retention}}
+\end{figure}
+
+
 \section{Discussion}
 
-\bf{Astronomy is not suffering from a funding crisis, but rather a funding \emph{allocation} crisis.} A simple thought experiment can help illustrate the problem. What would happen if the NSF was able to double it's Astronomy budget? Much of that money would be distributed as grants, that would then be used to hire graduate students and post docs. Very little of the money would go to funding permanent positions. Increasing federal astronomy funding would actually exaserbate PhD overproduction. 
+{\bf{Astronomy is not suffering from a funding crisis, but rather a funding {\emph{allocation}} crisis.}} A simple thought experiment can help illustrate the problem. What would happen if the NSF was able to double it's Astronomy budget? Much of that money would be distributed as grants, that would then be used to hire graduate students and post docs. Very little of the money would go to funding permanent positions. Increasing federal astronomy funding would actually exaserbate PhD overproduction. 
 
 With a large increase in funding from XXXX to XXX, driven largly by NASA, there has been an increase in Astronomy PhD production with little to no increase in long-term positions for these PhDs.  This needs to be recognized as a failure of Astronomy funding agencies, as they paid to develop a talented workforce with no plans to retain that talent. Similarly, we must hold professional organizations responsible for failing to advocate for a funding stream allocated for the long-term health of the field.  
 
@@ -146,10 +172,11 @@ Using the ADS, we find that retention of new Astronomy PhDs is at a 15+ year low
 
 %--------------------------------------
 \acknowledgments
-Thanks everyone. Thanks to sponsors of AAS Hack Day 2016. 
+Thanks everyone. Thanks to sponsors of AAS Hack Day 2016.
 
+This research has made use of NASA's Astrophysics Data System. Very heavy use.
 
-\bibliography{big_jabref.bib}
+\bibliography{bib}
 
 
 
