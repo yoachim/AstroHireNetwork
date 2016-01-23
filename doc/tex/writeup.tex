@@ -42,6 +42,8 @@ blah blah blah, abstract
 
 \section{Introduction}
 
+It is often difficult to determine the state of the Astronomy job market.  Analysis of the science job market often lumps all sciences together, in which case Biologists dominate the statistics, or, if the sciences are separated, Astronomy is usually grouped with Physics, where the number of Physisists outnumbers the Astronomers.  
+
 \citet{Seth09} build on the work of \citet{Metcalfe08} and looks at the rise of the postdoc era in Astronomy and Astrophysics.  They show that as the infaltion-adjusted US-Astronomy budget doubled over 20 years, there was a modest increase in PhD production and a huge rise in the number of temporary postdoc positions.
 
 In this paper, we use the ADS to explore the ramifications of that rising postdoc bubble.  While the NSF regularly surveys PhD reciepents (e.g., \url{http://nsf.gov/statistics/nsf07305/}), even with high participation rates, surveys will tend to be biased against those that leave the field since they will be harder to contact.
@@ -73,7 +75,9 @@ Every ADS entry is a node in our network. We draw an edge between nodes if they 
   \item{If the information contained in the titles of the entries are similar enough.}
 \end{itemize}
 
-We then select only the entries which are somehow connected to the PhD thesis of interest.  Some example ADS entry network graphs are shown in Figure~XXX.
+This is a rather simle codification of the common-sense process one would take to guess if it is the same author on two papers. With services such as ORCID\footnote{\url{http://orcid.org/}}, it should be possible to build a training set of papers known to be linked to a single author as a training set for machine learning algorithms.  
+
+We then select only the entries which are linked to the PhD thesis of interest.  Some example ADS entry network graphs are shown in Figure~XXX.
 
 Once we have selected only those entries we believe are connected to the correct thesis author, we demand that at least one of the entries be in a peer-reviewed astronomy journal (XXX-list of journals) to eliminate physics thesis entries.
 
@@ -90,6 +94,7 @@ Plots to make:
 \begin{itemize}
 \item{Example paper clouds}
 \item{number of US astro phds per year}
+  \item{retention curve - retention curve for unique name}
 \end{itemize}
 
 
@@ -116,11 +121,16 @@ It is worth emphasizing that while there are undoubtably some cases where we hav
 
 \section{Observations}
 
+To test how much we are affected by over-linking ADS entries, we compare the retention curves of all astronomers to those with unique PhD names.  xxx-should also then take the unique names and see how it changes if I use the last entry rather than the last linked entry.
+
+
 \section{Discussion}
 
-{\bf{Astronomy is not suffering from a funding crisis, but rather a funding allocation crisis.}} A simple thought experiment can help illustrate the problem. What would happen if the NSF was able to double it's Astronomy budget? Much of that money would be distributed as grants, that would then be used to hire graduate students and post docs. Very little of the money would go to funding permanent positions. Increasing federal astronomy funding would actually exaserbate PhD overproduction. 
+\bf{Astronomy is not suffering from a funding crisis, but rather a funding \emph{allocation} crisis.} A simple thought experiment can help illustrate the problem. What would happen if the NSF was able to double it's Astronomy budget? Much of that money would be distributed as grants, that would then be used to hire graduate students and post docs. Very little of the money would go to funding permanent positions. Increasing federal astronomy funding would actually exaserbate PhD overproduction. 
 
+With a large increase in funding from XXXX to XXX, driven largly by NASA, there has been an increase in Astronomy PhD production with little to no increase in long-term positions for these PhDs.  This needs to be recognized as a failure of Astronomy funding agencies, as they paid to develop a talented workforce with no plans to retain that talent. Similarly, we must hold professional organizations responsible for failing to advocate for a funding stream allocated for the long-term health of the field.  
 
+The failure to retain early-career Astronomers is analagous to building 4 new telescopes, when one knows there will only be enough funding to opperate 2.  Such a lack of planning and wasteful use of research funding would not be tolerated with hardware, and it should not be tolerated with meatware. 
 
 
 
@@ -131,7 +141,7 @@ It is worth emphasizing that while there are undoubtably some cases where we hav
 
 
 \section{Conculsions}
-blah blah conclusions.
+Using the ADS, we find that retention of new Astronomy PhDs is at a 15+ year low.  
 
 
 %--------------------------------------
