@@ -17,12 +17,12 @@
 
 
 
-\shorttitle{Short Title}
+\shorttitle{OMG No Jobs!}
 \shortauthors{Yoachim et al.}
 
 \begin{document}
 
-\title{Publication Lifetimes of American Astronomy PhDs}
+\title{Publication Lifetimes of American Astronomy PhDs: A Recent Collapse}
 
 \author{Peter Yoachim\altaffilmark{1}, author 2, author 3 
   }
@@ -39,18 +39,20 @@ blah blah blah, abstract
 \keywords{employment}
 
 
+\section{TO DO}
+Find an example network that ended up under-linked.  Looks like Jake might be a good example.
 
 \section{Introduction}
 
-It is often difficult to determine the state of the Astronomy job market.  Analysis of the science job market often lumps all sciences together, in which case Biologists dominate the statistics, or, if the sciences are separated, Astronomy is usually grouped with Physics, where the number of Physisists outnumbers the Astronomers.  
+It is often difficult to determine the state of the Astronomy job market.  Analysis of the science job market often lumps all sciences together, in which case Biologists dominate the statistics, or, if the sciences are separated, Astronomy is usually grouped with Physics, where the number of Physicists outnumbers the Astronomers.  
 
-\citet{Seth09} build on the work of \citet{Metcalfe08} and looks at the rise of the postdoc era in Astronomy and Astrophysics.  They show that as the infaltion-adjusted US-Astronomy budget doubled over 20 years, there was a modest increase in PhD production and a huge rise in the number of temporary postdoc positions.
+\citet{Seth09} build on the work of \citet{Metcalfe08} and looks at the rise of the postdoc era in Astronomy and Astrophysics.  They show that as the inflation-adjusted US-Astronomy budget doubled over 20 years, there was a modest increase in PhD production and a huge rise in the number of temporary postdoc positions.
 
-In this paper, we use the ADS to explore the ramifications of that rising postdoc bubble.  While the NSF regularly surveys PhD reciepents (e.g., \url{http://nsf.gov/statistics/nsf07305/}), even with high participation rates, surveys will tend to be biased against those that leave the field since they will be harder to contact.
+In this paper, we use the ADS to explore the ramifications of that rising postdoc bubble.  While the NSF regularly surveys PhD recipients (e.g., \url{http://nsf.gov/statistics/nsf07305/}), even with high participation rates, surveys will tend to be biased against those that leave the field since they will be harder to contact.
 
 Thus, we propose to use the publication record of PhDs to track the overall health of the field.  
 
-Unfortunately, some astronomers still believe that ``... the [astronomy faculty job] market is no worse or better than it is has been for at least a decade or two'' (via Charfman \url{http://jjcharfman.tumblr.com/}).  The goal of this paper is to check this statement and quantify the astronomy job market by looking at the publication footprint PhD Astronomers leave in the ADS system. 
+Unfortunately, some astronomers still believe that ``... the [astronomy faculty job] market is no worse or better than it is has been for at least a decade or two'' (via Charfman \url{http://jjcharfman.tumblr.com/}).  The goal of this paper is to check this statement and quantify the astronomy job market by tracking the digital footprints Astronomers leave in ADS. 
 
 XXX-description of ADS, how it includes peer-reviewed papers as well as things like conference proceedings, posters, grants, etc.
 
@@ -58,7 +60,7 @@ XXX-description of ADS, how it includes peer-reviewed papers as well as things l
 
 All the code used for this paper is available on github\footnote{\url{https://github.com/yoachim/AstroHireNetwork}}
 
-We use the excelent Python Module to Interact with NASA's ADS that Doesn't Suck™\footnote{\url{https://github.com/andycasey/ads}} to programatically access records from the SAO/NASA Astrophysics Data System XXX--figure out proper way to cite code. 
+We use the excellent Python Module to Interact with NASA's ADS that Doesn't Suck™\footnote{\url{https://github.com/andycasey/ads}} to programmatic access records from the SAO/NASA Astrophysics Data System XXX--figure out proper way to cite code. 
 
 Our procedure for building a database of Astronomy and Astrophysics PhDs is as follows.  We select all PhD Thesis records for a given year and screen to include only those records that have an affiliation in the United States.
 
@@ -75,13 +77,13 @@ Every ADS entry is a node in our network. We draw an edge between nodes if they 
   \item{If the information contained in the titles of the entries are similar enough.}
 \end{itemize}
 
-This is a rather simle codification of the common-sense process one would take to guess if it is the same author on two papers. With services such as ORCID\footnote{\url{http://orcid.org/}}, it should be possible to build a training set of papers known to be linked to a single author as a training set for machine learning algorithms.  
+This is a rather similar codification of the common-sense process one would take to guess if it is the same author on two papers. With services such as ORCID\footnote{\url{http://orcid.org/}}, it should be possible to build a training set of papers known to be linked to a single author as a training set for machine learning algorithms.  
 
-We then select only the entries which are linked to the PhD thesis of interest.  Some example ADS entry network graphs are shown in Figure~XXX.
+We then select only the entries which are linked to the PhD thesis of interest.  Some example ADS entry network graphs are shown in Figure~\ref{fig:example_networks}.
 
 Once we have selected only those entries we believe are connected to the correct thesis author, we demand that at least one of the entries be in a peer-reviewed astronomy journal (XXX-list of journals) to eliminate physics thesis entries.
 
-Thus, our definition of a US PhD astronomer is effectively a person who recieved a PhD from an institution in the United States and has published at least one paper in an astronomy journal.
+Thus, our definition of a US PhD astronomer is effectively a person who received a PhD from an institution in the United States and has published at least one paper in an astronomy journal.
 
 We record the thesis author's most recent ADS entry date (need not be a peer-reviewed paper)  and a bunch of other stuff.
 
@@ -105,9 +107,6 @@ Plots to make:
 % Do any of those Williams papers overlap? NO not a one! Wow. Must be using middle initials.
 
 
-
-
-
 Possible ways we could fail to recognize an author has published for as long as they actually have
 \begin{itemize}
 \item{If someone simultaneously changes institution and area of study}
@@ -123,9 +122,17 @@ Ways we could mistakenly claim an author has published for longer than they actu
   \item{If two authors have similar names and similarly named co-authors}
 \end{itemize}
 
-The overall point is that errors can happen both ways and both should be relavively rare, giving us a more accurate measurement of astronomer career lifetimes than survey results which rarely top XXX\% response rates.
+Thus there are two types of errors that can skew our results, over-linking our networks, connecting ADS entries that are not actually by the same author and under-linking, where we fail to recognize entries that are by the same author.  To look for the effects of over- and under-linking, we flag authors where the ADS database only lists one PhD thesis as matching their last name, and first initial. These represent less-common names that should suffer much lower rates of over-linking.
 
-It is worth emphasizing that while there are undoubtably some cases where we have not accuratly recorded an astronomer, we do not suffer the selection biases that go with survey-based studies and that our errors should be similar accross PhD cohorts, thus we can draw strong conclusions about the relative differences between PhD classes.
+Using the less-common name subset, we can also test for under-linking by assuming the names are unique and all the ADS entries returned for a name search should be linked.  The results of the unique name tests are shown in Figure~\ref{fig:unames}. We find little evidence of under-linking. Comparing the less-common name results changes the retention rate by only $\sim4$\%. When we test for under-linking, we find recent PhDs could be suffering from under-linking at the 5-10\% level, while older PhDs suffer under-linking at lower rates (2-5\%).  This should be slightly expected, as younger astronomers typically change institutions, and many will have not yet published papers that link back to their previously established cloud.  The important aspect is that the relative over- and under-linking between PhD cohorts is similar.  Thus, the recent dramatic (20\%) drop we observe in astronomer retention is real and not an artifact of how we assign ADS entries to authors.
+
+\begin{figure}
+  \plotone{../../plots/linkCheck.pdf}
+  \caption{\label{fig:unames}}
+  \end{figure}
+
+
+It is worth emphasizing that while there are undoubtedly some cases where we have not accurately recorded an astronomer, we do not suffer the selection biases that go with survey-based studies and that our errors should be similar across PhD cohorts, thus we can draw strong conclusions about the relative differences between PhD classes.
 
 \section{Observations}
 
@@ -152,11 +159,11 @@ To test how much we are affected by over-linking ADS entries, we compare the ret
 
 \section{Discussion}
 
-{\bf{Astronomy is not suffering from a funding crisis, but rather a funding {\emph{allocation}} crisis.}} A simple thought experiment can help illustrate the problem. What would happen if the NSF was able to double it's Astronomy budget? Much of that money would be distributed as grants, that would then be used to hire graduate students and post docs. Very little of the money would go to funding permanent positions. Increasing federal astronomy funding would actually exaserbate PhD overproduction. 
+{\bf{Astronomy is not suffering from a funding crisis, but rather a funding {\emph{allocation}} crisis.}} A simple thought experiment can help illustrate the problem. What would happen if the NSF was able to double it's Astronomy budget? Much of that money would be distributed as grants, that would then be used to hire graduate students and post docs. Very little of the money would go to funding permanent positions. Increasing federal astronomy funding would actually exacerbate PhD overproduction. 
 
-With a large increase in funding from XXXX to XXX, driven largly by NASA, there has been an increase in Astronomy PhD production with little to no increase in long-term positions for these PhDs.  This needs to be recognized as a failure of Astronomy funding agencies, as they paid to develop a talented workforce with no plans to retain that talent. Similarly, we must hold professional organizations responsible for failing to advocate for a funding stream allocated for the long-term health of the field.  
+With a large increase in funding from XXXX to XXX, driven largely by NASA, there has been an increase in Astronomy PhD production with little to no increase in long-term positions for these PhDs.  This needs to be recognized as a failure of Astronomy funding agencies, as they paid to develop a talented workforce with no plans to retain that talent. Similarly, we must hold professional organizations responsible for failing to advocate for a funding stream allocated for the long-term health of the field.  
 
-The failure to retain early-career Astronomers is analagous to building 4 new telescopes, when one knows there will only be enough funding to opperate 2.  Such a lack of planning and wasteful use of research funding would not be tolerated with hardware, and it should not be tolerated with meatware. 
+The failure to retain early-career Astronomers is analogous to building 4 new telescopes, when one knows there will only be enough funding to operate 2.  Such a lack of planning and wasteful use of research funding would not be tolerated with hardware, and it should not be tolerated with meatware. 
 
 
 
@@ -166,7 +173,7 @@ The failure to retain early-career Astronomers is analagous to building 4 new te
 %\end{figure}
 
 
-\section{Conculsions}
+\section{Conclusions}
 Using the ADS, we find that retention of new Astronomy PhDs is at a 15+ year low.  
 
 
@@ -182,3 +189,6 @@ This research has made use of NASA's Astrophysics Data System. Very heavy use.
 
 
 \end{document}
+
+%%  LocalWords:  Metcalfe PhDs Charfman github SAO pre networkx ORCID
+%%  LocalWords:  scikit Bellm sim XXXX meatware AAS
