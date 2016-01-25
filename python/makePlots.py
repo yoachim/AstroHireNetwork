@@ -54,6 +54,7 @@ def linkCheck():
     year_mins = np.arange(1999,2011+binsize,binsize)
     year_maxes = np.arange(2000,2012+binsize,binsize)
     fig,ax = plt.subplots()
+    fig2,ax2 = plt.subplots()
 
     colors = [ plt.cm.jet(x) for x in np.linspace(0, 1, year_mins.size) ]
 
@@ -70,14 +71,38 @@ def linkCheck():
         ax.plot(bins1, test1-baseline, '-', label='%i-%i' % (ymin,ymax),
                 color=color)
         ax.plot(bins1, test2-baseline, '--', color=color)
+        resid1 = test1-baseline
+        resid2 = test2-baseline
+        yerr = [[],[]]
+        for r1,r2 in zip(resid1,resid2):
+            min_resid = np.min([r1,r2])
+            max_resid = np.max([r1,r2])
+            if min_resid < 0:
+                yerr[0].append(np.abs(min_resid))
+            else:
+                yerr[0].append(0)
+            if max_resid > 0:
+                yerr[1].append(max_resid)
+            else:
+                yerr[1].append(0)
+
+        ax2.errorbar(bins1,baseline, yerr=yerr, ecolor=color,
+                     color=color, fmt='-o', label='%i-%i' % (ymin,ymax),
+                     alpha=.8)
 
 
-    ax.legend()
+    ax.legend(numpoints=1)
     ax.set_xlabel('Years post PhD')
     ax.set_ylabel('Active Fraction - Unique Name Active Fraction')
     fig.savefig('../plots/linkCheck.pdf')
     plt.close(fig)
 
+    ax2.legend(numpoints=1)
+    ax2.set_xlim([0,17])
+    ax2.set_xlabel('Years post PhD')
+    ax2.set_ylabel('Fraction Still Active in ADS')
+    fig2.savefig('../plots/linkCheck_errorbars.pdf')
+    plt.close(fig2)
 
 
 def exampleNetworks():
