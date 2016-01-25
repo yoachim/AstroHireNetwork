@@ -79,6 +79,9 @@ def authSimple(author):
     else:
         temp = author.split(' ')
         result = temp[-1] + ', '+temp[0][0]
+    result = result.lower()
+    # Eliminate any unexpected upper-case letters
+    result = result[0].upper()+result[1:-1]+result[-1].upper()
     return result
 
 
@@ -149,7 +152,7 @@ def authorGroup(articleList, anchorArticle, anchorAuthor,
                 match = True
             elif titleArray[i][j] > titleMatchLimit:
                 match = True
-            else:
+            if not match:
                 match = checkAuthorMatch(articleList[i], articleList[j],
                                          authorName=anchorAuthor)
             if match:
@@ -260,6 +263,8 @@ def checkAuthorMatch(article1,article2,authorName=None,
             if (aff1 is not None) & (aff2 is not None):
                 if checkAffMatch(aff1,aff2,matchThresh=matchThresh):
                     return True
+    #if (article1.author[0] == 'Palaversa, Lovro') | (article1.author[0] == 'Palaversa, Lovro'):
+    #    import pdb ; pdb.set_trace()
 
     # Check if they have enough common authors
     commonAuthors = article1.authorset.intersection(article2.authorset)
@@ -511,7 +516,7 @@ def testPerson(name, phdyear):
 
 
     print 'PhD Institution: %s' % result['phd aff']
-    print 'Latest Institution: %s' % result['latest aff']
+    print 'Latest Institution: %s' % result['latest aff'].encode('utf-8')
     print 'Last year: %i' % result['latest year']
 
 def testOverlap():
