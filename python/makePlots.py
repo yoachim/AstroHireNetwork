@@ -81,8 +81,8 @@ def linkCheck():
 
 
 def exampleNetworks():
-    names = ['Yoachim, P', 'Bellm, E', 'Williams, B', 'Williams, B' ]
-    years = [2007, 2011, 2002, 2010]
+    names = ['Yoachim, P', 'Bellm, E', 'Williams, B', 'Williams, B','VanderPlas, J' ]
+    years = [2007, 2011, 2002, 2010, 2012]
     count = 1
     for name,year in zip(names,years):
         phdA =  list(ads.query('bibstem:*PhDT', authors=name, dates=year,
