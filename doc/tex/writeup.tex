@@ -1,4 +1,3 @@
-
 %\documentclass[12pt,preprint]{aastex}
 \documentclass{emulateapj}
 \usepackage{url}
@@ -41,12 +40,12 @@ blah blah blah, abstract
 
 \section{TO DO}
 \begin{itemize}
-  \item{re-run the data scrape to account for mixed case names. Maybe also strip accents, etc?}
+  \item{re-run the data scrape to account for mixed case names. DONE-Maybe also strip accents, etc?--note use of leven to match author names in cases where accents may have been converted in some journals. }
 \end{itemize}
 
 \section{Introduction}
 
-It is often difficult to determine the state of the Astronomy job market.  Analysis of the science job market often lumps all sciences together, in which case Biologists dominate the statistics, or, if the sciences are separated, Astronomy is usually grouped with Physics, where the number of Physicists outnumbers the Astronomers.  
+It is often difficult to determine the state of the Astronomy job market.  Analysis of the science job market often lumps all sciences together, in which case Biologists dominate the statistics, or, if the sciences are separated, Astronomy is usually grouped with Physics (e.g., the Bureau of Labor and Statistics lists 20,000 Physicists and Astronomers jobs in 2014 \footnote{\url{http://www.bls.gov/ooh/life-physical-and-social-science/physicists-and-astronomers.htm}}), where the number of Physicists outnumbers the Astronomers.  The American Astronomical Society currently lists it's membership at around 7,000.
 
 \citet{Seth09} build on the work of \citet{Metcalfe08} and looks at the rise of the postdoc era in Astronomy and Astrophysics.  They show that as the inflation-adjusted US-Astronomy budget doubled over 20 years, there was a modest increase in PhD production and a huge rise in the number of temporary postdoc positions.
 
@@ -68,7 +67,7 @@ Our procedure for building a database of Astronomy and Astrophysics PhDs is as f
 
 For each US PhD, we then query ADS for all entries with the PhD author's last name and first initial with a date limit of 7 years pre-PhD to the present (Jan 2016).
 
-For common names (e.g., Jones, R and Williams, B), our author query returns entries from multiple authors.  To try and restrict the results to only those papers with the same author as the PhD thesis, we construct a network graph using \citet{networkx}.
+For common names (e.g.,  Williams, B), our author query returns entries from multiple authors.  To try and restrict the results to only those papers with the same author as the PhD thesis, we construct a network graph using \citet{networkx}.
 
 Every ADS entry is a node in our network. We draw an edge between nodes if they meet any of the following criteria:
 \begin{itemize}
