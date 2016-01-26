@@ -106,18 +106,21 @@ def linkCheck():
 
 
 def exampleNetworks():
-    names = ['Yoachim, P', 'Bellm, E', 'Williams, B', 'Williams, B','VanderPlas, J' ]
-    years = [2007, 2011, 2002, 2010, 2012]
+    names = ['Yoachim, P', 'Bellm, E', 'Williams, B', 'Williams, B','Wetzel, A', 'Capelo, P']
+    years = [2007, 2011, 2002, 2010, 2010,2012]
+    texts = ['(a)', '(b)','(c)', '(d)','(e)','(f)']
     count = 1
-    for name,year in zip(names,years):
+    for name,year,txt in zip(names,years,texts):
+        fig,ax = plt.subplots()
         phdA =  list(ads.query('bibstem:*PhDT', authors=name, dates=year,
                                database='astronomy', rows='all'))
 
         result,graph = phdArticle2row(phdA[0], checkUSA=False, verbose=True, returnNetwork=True)
-        nx.draw_spring(graph)
-        plt.savefig('../plots/example_network_%i.pdf' %count )
+        nx.draw_spring(graph, ax=ax)
+        ax.text(.1,.8, txt, fontsize=24, transform=ax.transAxes)
+        fig.savefig('../plots/example_network_%i.pdf' %count )
         count += 1
-        plt.close('all')
+        plt.close(fig)
         print result
 
 

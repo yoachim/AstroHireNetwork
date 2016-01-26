@@ -41,7 +41,6 @@ blah blah blah, abstract
 
 \section{TO DO}
 \begin{itemize}
-\item{Find an example network that ended up under-linked.}
   \item{re-run the data scrape to account for mixed case names. Maybe also strip accents, etc?}
 \end{itemize}
 
@@ -95,17 +94,16 @@ We also flag if there are any other thesis entries (from any year) that match th
 One known issue is that ADS does not contain all Astronomy PhD dissertations. We found that XXX is not listed in ADS (see github issue).
 
 
-Plots to make:
-\begin{itemize}
-\item{Do my tests for over-linking and under-linking using unique names.}
-\end{itemize}
-
-
 \begin{figure*}
   \plottwo{../../plots/example_network_1.pdf}{../../plots/example_network_2.pdf}\\
     \plottwo{../../plots/example_network_3.pdf}{../../plots/example_network_4.pdf}
         \caption{Examples of network graphs constructed to find papers linked to individual PhD thesis entries in ADS.   Top Left: Network of ADS entries with the same author as \citet{Yoachim07} (45 entries, 43 linked to the PhD), Top Right: Network for \citet{Bellm2011} (103 entries, 97 linked), Bottom Left: Network for \citet{Williams02}, (313 papers, 268 linked) Bottom Right: Network for \citet{Williams11} (157 papers, 111 linked).  Note, none of the linked papers for the two Williams PhDs overlap. \label{fig:example_networks}}
 \end{figure*}
+
+\begin{figure}
+  \plottwo{../../plots/example_network_5.pdf}{../../plots/example_network_6.pdf}
+  \caption{Example of an ADS networks that suffers from under-linking.  Left: Only 11 of the 29 entries can be linked back to \citet{Wetzel10}.  Right: The under-linked network of \citet{Capelo12}.  A single ADS entry in the future could link a network back together.}
+\end{figure}
 
 % Do any of those Williams papers overlap? NO not a one! Wow. Must be using middle initials.
 

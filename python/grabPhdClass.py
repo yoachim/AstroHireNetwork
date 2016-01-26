@@ -5,6 +5,7 @@ import numpy as np
 import difflib
 import datetime
 from sklearn.feature_extraction.text import TfidfVectorizer
+from leven import levenshtein
 
 def checkUSAff(affil):
     """
@@ -254,17 +255,19 @@ def checkAuthorMatch(article1,article2,authorName=None,
         if np.abs(int(article1.year)-int(article2.year)) <= yearGap:
             aff1 = None
             aff2 = None
-            for name, aff in zip(article1.author,article1.aff):
-                if authSimple(name) == authSimple(authorName):
-                    aff1 = affClean(aff)
-            for name, aff in zip(article2.author,article2.aff):
-                if authSimple(name) == authSimple(authorName):
-                    aff2 = affClean(aff)
+            lDists = [levenshtein(authorName,authSimple(name)) for
+                      name in article1.author]
+            good = np.where(lDists == np.min(lDists))[0]
+            if lDists[good] < 3:
+                aff1 = affClean(article1.aff[good])
+            lDists = [levenshtein(authorName,authSimple(name)) for
+                      name in article2.author]
+            good = np.where(lDists == np.min(lDists))[0]
+            if lDists[good] < 3:
+                aff2 = affClean(article2.aff[good])
             if (aff1 is not None) & (aff2 is not None):
                 if checkAffMatch(aff1,aff2,matchThresh=matchThresh):
                     return True
-    #if (article1.author[0] == 'Palaversa, Lovro') | (article1.author[0] == 'Palaversa, Lovro'):
-    #    import pdb ; pdb.set_trace()
 
     # Check if they have enough common authors
     commonAuthors = article1.authorset.intersection(article2.authorset)
