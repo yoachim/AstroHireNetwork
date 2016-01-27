@@ -258,11 +258,16 @@ def checkAuthorMatch(article1,article2,authorName=None,
             lDists = [levenshtein(authorName,authSimple(name)) for
                       name in article1.author]
             good = np.where(lDists == np.min(lDists))[0]
+            # Can't tell which one is author, can't link it up.
+            if np.size(good) > 1:
+                return False
             if lDists[good] < 3:
                 aff1 = affClean(article1.aff[good])
             lDists = [levenshtein(authorName,authSimple(name)) for
                       name in article2.author]
             good = np.where(lDists == np.min(lDists))[0]
+            if np.size(good) > 1:
+                return False
             if lDists[good] < 3:
                 aff2 = affClean(article2.aff[good])
             if (aff1 is not None) & (aff2 is not None):
