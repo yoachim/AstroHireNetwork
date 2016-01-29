@@ -12,13 +12,18 @@ Dependencies:
 To Run:
 -------
 To generate the rows for a given PhD cohort:
->runYear.py 2001
+```
+runYear.py 2001
+```
 or a bunch
->seq 1995 2013 | xargs -I'{}' runYear.py '{}'
-
+```
+seq 1995 2013 | xargs -I'{}' runYear.py '{}'
+```
 Then combine all the years:
->combine.sh
-
+```
+combine.sh
+```
 Make plots:
+```
 makePlots.py --plot1 --plot2 --network
-
+```
