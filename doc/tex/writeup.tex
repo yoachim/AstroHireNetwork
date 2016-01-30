@@ -62,34 +62,59 @@ XXX-description of ADS, how it includes peer-reviewed papers as well as things l
 
 All the code used for this paper is available on github\footnote{\url{https://github.com/yoachim/AstroHireNetwork}}
 
-We use the excellent Python Module to Interact with NASA's ADS that Doesn't Suck™\footnote{\url{https://github.com/andycasey/ads}} to programmatic access records from the SAO/NASA Astrophysics Data System XXX--figure out proper way to cite code. 
+We use the excellent Python Module to Interact with NASA's ADS that Doesn't Suck™\footnote{\url{https://github.com/andycasey/ads}} to access records from the SAO/NASA Astrophysics Data System XXX--figure out proper way to cite code. 
 
 Our procedure for building a database of Astronomy and Astrophysics PhDs is as follows.  We select all PhD Thesis records for a given year and screen to include only those records that have an affiliation in the United States.
 
 For each US PhD, we then query ADS for all entries with the PhD author's last name and first initial with a date limit of 7 years pre-PhD to the present (Jan 2016).
 
-For common names (e.g.,  Williams, B), our author query returns entries from multiple authors.  To try and restrict the results to only those papers with the same author as the PhD thesis, we construct a network graph using \citet{networkx}.
+For common names (e.g.,  Williams, B), our author query returns entries from multiple authors.  To try and restrict the results to only those papers with the same author as the PhD thesis, we construct a network graph of the ADS entries using \citet{networkx}.
 
 Every ADS entry is a node in our network. We draw an edge between nodes if they meet any of the following criteria:
 \begin{itemize}
-\item{If the affiliation of the thesis author matches, and the year of the entry is within 2 years. XXX-describe affil match fuzzy string, plus if one string is contained in the other.}
+\item{If the affiliation of the thesis author matches, and the year of the entry is within 2 years.}
 \item{If the entries have 3 or more authors in common in their author lists.}
 \item{If there are two authors and they are identical on the two entries.}
 \item{If the information contained in the abstracts are similar enough as measured by XXX-magic fucking black boxXXX TfidfVectorizer from \citet{scikit-learn}}
   \item{If the information contained in the titles of the entries are similar enough.}
 \end{itemize}
 
+For our affiliation matching, we consider the affiliations to match if one affiliation is contained in the other.  For example, ``The University of Washington'' is considered a match to ``Department of Astronomy, University of Washington, Box 351580''.  We also compare the two affiliation strings with the python difflib SequenceMatcher, and consider any affiliations that have a similarity ratio greater than 0.7 as matching.  For example ``Berkeley'' and ``UC Berkeley'' have a ratio of 0.8, and would thus be considred matching.
+
 This is a rather similar codification of the common-sense process one would take to guess if it is the same author on two papers. With services such as ORCID\footnote{\url{http://orcid.org/}}, it should be possible to build a training set of papers known to be linked to a single author as a training set for machine learning algorithms.  
 
 We then select only the entries which are linked to the PhD thesis of interest.  Some example ADS entry network graphs are shown in Figure~\ref{fig:example_networks}.
 
-Once we have selected only those entries we believe are connected to the correct thesis author, we demand that at least one of the entries be in a peer-reviewed astronomy journal (XXX-list of journals) to eliminate physics thesis entries.
+Once we have selected only those entries we believe are connected to the correct thesis author, we demand that at least one of the entries be in a peer-reviewed astronomy journal or a contribution at a major astronomy conference (XXX-list of journals) to eliminate physics thesis entries.  The list of publications we use to label someone as an astronomer are listed in Table~\ref{table:journal_list}. We consider an ADS listed publication to be a match if any of our selected journals are contained in the publication string, e.g., ``Astrophysical Journal Letters'' would count as a match because it contains ``Astronomical Jounal'' which is in our list. 
+
+The ADS publication must match at least one of:
+\begin{deluxetable}{ll}
+\tabletypesize{\small}% \footnotesize \scriptsize}
+\tabletypesize{\small}
+%\rotate
+\tablewidth{0pt}
+%\tablenum{num}
+%\tablecolumns{num}
+%\tableheadfrac{num}
+\tablecaption{Publications Used to Classify Authors As Astronomers}
+\tablehead{ \colhead{Journal} & \colhead{abbr.} \label{table:journal_list}}
+\startdata
+Astronomy and Astrophysics & A\&A \\
+Astrophysical Journal & AJ \\
+Astronomical Journal & ApJ \\
+Monthly Notices of the Royal Astronomical Society & MNRAS \\
+Icarus \\
+American Astronomical Society & AAS \\
+International Astronomical Union & IAU
+\enddata
+\end{deluxetable}
+
 
 Thus, our definition of a US PhD astronomer is effectively a person who received a PhD from an institution in the United States and has published at least one paper in an astronomy journal.
 
 We record the thesis author's most recent ADS entry date (need not be a peer-reviewed paper)  and a bunch of other stuff.
 
-We also flag if there are any other thesis entries (from any year) that match the last name, first initial of the thesis entry so that we can compare the full database to those with more unique names who should suffer fewer errors in the entry network construction.
+We also flag if there are any other thesis entries (from any year) that match the last name, first initial of the thesis entry so that we can compare the full database to those with more unique names.
 
 One known issue is that ADS does not contain all Astronomy PhD dissertations. We found that XXX is not listed in ADS (see github issue).
 
@@ -100,10 +125,10 @@ One known issue is that ADS does not contain all Astronomy PhD dissertations. We
         \caption{Examples of network graphs constructed to find papers linked to individual PhD thesis entries in ADS.   Top Left: Network of ADS entries with the same author as \citet{Yoachim07} (45 entries, 43 linked to the PhD), Top Right: Network for \citet{Bellm2011} (103 entries, 97 linked), Bottom Left: Network for \citet{Williams02}, (313 papers, 268 linked) Bottom Right: Network for \citet{Williams11} (157 papers, 111 linked).  Note, none of the linked papers for the two Williams PhDs overlap. \label{fig:example_networks}}
 \end{figure*}
 
-\begin{figure}
+\begin{figure*}
   \plottwo{../../plots/example_network_5.pdf}{../../plots/example_network_6.pdf}
   \caption{Example of an ADS networks that suffers from under-linking.  Left: Only 11 of the 29 entries can be linked back to \citet{Wetzel10}.  Right: The under-linked network of \citet{Capelo12}.  A single ADS entry in the future could link a network back together.}
-\end{figure}
+\end{figure*}
 
 % Do any of those Williams papers overlap? NO not a one! Wow. Must be using middle initials.
 
