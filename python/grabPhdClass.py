@@ -167,7 +167,7 @@ def authorGroup(articleList, anchorArticle, anchorAuthor,
     # Now I have the bibcodes for all the papers that are connected
     # to the anchorArticle
 
-    # XXX -- test here to see if the network looks under-connected.
+    # XXX--NEED TO TAKE THIS PART OUT.  MAYBE ADD A DIFFERENT NAME CHECKER FOR EXACT NAME MATCHES.
     # If it might be under-connected, use the references to try and make more links.
 
     # Is the max connected year <= the max of all papers?
