@@ -87,7 +87,7 @@ def authSimple(author):
 
 
 def authorGroup(articleList, anchorArticle, anchorAuthor,
-                absMatchLimit=0.5, titleMatchLimit=0.6):
+                absMatchLimit=0.5, titleMatchLimit=0.6, unconnLimit=5):
     """
     Given a list of articles, go through and find the ones that are connected to anchorArticle.
 
@@ -161,14 +161,40 @@ def authorGroup(articleList, anchorArticle, anchorAuthor,
                                     articleList[j].bibcode)
 
     # Find all the papers that are connected to the articleNode
-    connectedPapers = nx.node_connected_component(paperGraph, anchorArticle.bibcode)
+    connectedBibcodes = nx.node_connected_component(paperGraph, anchorArticle.bibcode)
+    # Convert to a list of ads article objects to pass back
+    connectedPapers = [bibcodeDict[paperbibcode] for paperbibcode in connectedBibcodes]
     # Now I have the bibcodes for all the papers that are connected
     # to the anchorArticle
 
-    # Convert to a list of ads article objects to pass back
-    result = [bibcodeDict[paperbibcode] for paperbibcode in connectedPapers]
+    # XXX -- test here to see if the network looks under-connected.
+    # If it might be under-connected, use the references to try and make more links.
 
-    return result, paperGraph
+    # Is the max connected year <= the max of all papers?
+    # Is the fraction of unconnected papers high?
+    # is the min of the unconnected papers > min of connected?
+    connectedYears = np.array([paper.year for paper in connectedPapers if hasattr(paper,'year')], dtype=int)
+    allYears = np.array([paper.year for paper in articleList if hasattr(paper,'year')], dtype=int)
+    # I could just loop through the unconnected papers and see if any of them reference any of the
+    # connected papers.
+    connectedSet = set(connectedPapers)
+    if np.max(connectedYears) < np.max(allYears):
+        unconnArticles = list(set(articleList) - set(connectedPapers))
+        for unArticle in unconnArticles:
+            refs = unArticle.references
+            # are there any references to articles in the connected blob?
+            refback = list(set(refs) & connectedSet)
+            for ref in refback:
+                paperGraph.add_edge(unArticle.bibcode,
+                                    ref.bibcode)
+                connectedBibcodes = nx.node_connected_component(paperGraph, anchorArticle.bibcode)
+                connectedPapers = [bibcodeDict[paperbibcode] for paperbibcode in connectedBibcodes]
+                connectedYears = np.array([paper.year for paper in connectedPapers if
+                                           hasatttr(paper,'year')], dtype=int)
+                if np.max(connectedYears) == np.max(allYears):
+                    return connectedPapers, paperGraph
+
+    return connectedPapers, paperGraph
 
 def affClean(aff):
     """
@@ -366,6 +392,10 @@ def phdArticle2row(phdArticle, yearsPrePhD=7, verbose=False, checkUSA=True,
     # Find all the papers linked to the PHD in question
     linkedPapers, linkedGraph = authorGroup(paperList, phdArticle,
                                             authSimple(phdArticle.author[0]))
+
+    # Check if the
+
+
     if returnLinkedPapers:
         return linkedPapers
     result['numLinked'] = len(linkedPapers)
@@ -433,7 +463,11 @@ def phdArticle2row(phdArticle, yearsPrePhD=7, verbose=False, checkUSA=True,
     # Test to see if this is the only person with this name and a phd in astro
     ack = list(ads.query('bibstem:"*PhDT", author:"%s"' % authSimple(phdArticle.author[0]),
                          database='astronomy'))
+    titles = []
     if len(ack) > 1:
+        # Make sure the titles are different
+        titles = set([paper.title[0].lower() for paper in ack])
+    if len(titles) > 1:
         if verbose:
             print authSimple(phdArticle.author[0])+' returns multiple PhDT.'
         result['uniqueName'] = False
