@@ -7,8 +7,9 @@ import argparse as arg
 import networkx as nx
 import ads
 from grabPhdClass import phdArticle2row
-
-
+import sys
+sys.path.append("/Users/yoachim/gitRepos/matplotlib_pubplots/python")
+import set_plot_params as spp
 
 def retentionCurve(latest_years, phd_years):
     """
@@ -43,6 +44,8 @@ def linkCheck():
     Check to see if we are over or under-linking papers using the
     unique name flag
     """
+    figs = []
+    names = []
     data = readYear(0, filename = 'output/all_years.dat')
     # Make a histogram of number of PhDs per year
     good = np.where((data['noAstroJournal'] == 'None') &
@@ -94,15 +97,17 @@ def linkCheck():
     ax.legend(numpoints=1)
     ax.set_xlabel('Years post PhD')
     ax.set_ylabel('Active Fraction - Unique Name Active Fraction')
-    fig.savefig('../plots/linkCheck.pdf')
-    plt.close(fig)
+    figs.append(fig)
+    names.append('linkCheck')
 
     ax2.legend(numpoints=1)
     ax2.set_xlim([0,17])
     ax2.set_xlabel('Years post PhD')
     ax2.set_ylabel('Fraction Still Active in ADS')
-    fig2.savefig('../plots/linkCheck_errorbars.pdf')
-    plt.close(fig2)
+    figs.append(fig2)
+    names.append('linkCheck_errorbars')
+
+    return figs, names
 
 
 def exampleNetworks():
@@ -110,6 +115,8 @@ def exampleNetworks():
     years = [2007, 2011, 2002, 2010, 2010,2012]
     texts = ['(a)', '(b)','(c)', '(d)','(e)','(f)']
     count = 1
+    figs = []
+    filenames = []
     for name,year,txt in zip(names,years,texts):
         fig,ax = plt.subplots()
         phdA =  list(ads.query('bibstem:*PhDT', authors=name, dates=year,
@@ -118,10 +125,11 @@ def exampleNetworks():
         result,graph = phdArticle2row(phdA[0], checkUSA=False, verbose=True, returnNetwork=True)
         nx.draw_spring(graph, ax=ax)
         ax.text(.1,.8, txt, fontsize=24, transform=ax.transAxes)
-        fig.savefig('../plots/example_network_%i.pdf' %count )
+        figs.append(fig)
+        filenames.append('example_network_%i' %count)
         count += 1
-        plt.close(fig)
         print result
+    return figs, filenames
 
 
 def curvePlot(data,good, filename, title):
@@ -167,12 +175,14 @@ def curvePlot(data,good, filename, title):
     ax.set_ylabel('Fraction Still Active in ADS')
     ax.legend()
     ax.set_title(title)
-    fig.savefig(filename)
-    plt.close(fig)
+    return [fig], [filename]
 
 
 def makePlots(plot1=False, plot2=False, plot3=False, plot4=False):
     # Read in all the data
+    figs = []
+    names = []
+
     data = readYear(0, filename = 'output/all_years.dat')
 
     # Make a histogram of number of PhDs per year
@@ -185,20 +195,24 @@ def makePlots(plot1=False, plot2=False, plot3=False, plot4=False):
         blah = ax.hist(data['phd_year'][good], bins)
         ax.set_xlabel('Year')
         ax.set_ylabel('Number of US Astro PhDs')
-        fig.savefig('../plots/phdsperyear.pdf')
-        plt.close(fig)
+        figs.append(fig)
+        names.append('phdsperyear')
 
     if plot2:
-        filename = '../plots/active_curves.pdf'
+        filename = 'active_curves'
         title = 'All PhDs'
-        curvePlot(data,good, filename, title)
+        fig,name = curvePlot(data,good, filename, title)
+        figs.extend(fig)
+        names.extend(name)
     if plot3:
-        filename = '../plots/active_curves_uname.pdf'
+        filename = 'active_curves_uname'
         good = np.where((data['noAstroJournal'] == 'None') &
                         (data['nonUS'] == 'None') &
                         (data['uniqueName'] == 'True') )
         title = 'Unique PhD names'
-        curvePlot(data,good, filename, title)
+        fig,name = curvePlot(data,good, filename, title)
+        figs.extend(fig)
+        names.extend(name)
 
     # Let's plot the retention at 3,6,10 years as a function of cohort
     if plot4:
@@ -222,8 +236,9 @@ def makePlots(plot1=False, plot2=False, plot3=False, plot4=False):
         ax.set_xlabel('PhD Cohort Year')
         ax.set_ylabel('Fraction Active')
         ax.legend(loc='upper right')
-        fig.savefig('../plots/retention_by_class.pdf')
-        plt.close(fig)
+        figs.append(fig)
+        names.append('retention_by_class')
+        return figs, names
 
 if __name__ == '__main__':
 
@@ -236,19 +251,30 @@ if __name__ == '__main__':
     parser.add_argument('--network', dest='network', action='store_true')
     parser.add_argument('--linkCheck', dest='linkCheck', action='store_true')
 
-
     parser.set_defaults(plot1=False,plot2=False,plot3=False,
                         plot4=False, network=False, linkCheck=False)
 
     args = parser.parse_args()
 
-    makePlots(plot1=args.plot1,
+    passed_kwargs = dict(plot1=args.plot1,
               plot2=args.plot2,
               plot3=args.plot3,
               plot4=args.plot4)
 
+    funcs = []
+    kwargs = []
+    if True in passed_kwargs.values():
+        funcs.append(makePlots)
+        kwargs.append(passed_kwargs)
+
     if args.network:
-        exampleNetworks()
+        funcs.append(exampleNetworks)
+        kwargs.append({})
 
     if args.linkCheck:
-         linkCheck()
+         funcs.append(linkCheck)
+         kwargs.append({})
+
+
+    spp.plot_multi_format(funcs, plot_kwargs=kwargs,
+                          usetex=False, outdir='temp')

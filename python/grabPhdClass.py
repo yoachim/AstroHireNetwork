@@ -167,33 +167,6 @@ def authorGroup(articleList, anchorArticle, anchorAuthor,
     # Now I have the bibcodes for all the papers that are connected
     # to the anchorArticle
 
-    # XXX--NEED TO TAKE THIS PART OUT.  MAYBE ADD A DIFFERENT NAME CHECKER FOR EXACT NAME MATCHES.
-    # If it might be under-connected, use the references to try and make more links.
-
-    # Is the max connected year <= the max of all papers?
-    # Is the fraction of unconnected papers high?
-    # is the min of the unconnected papers > min of connected?
-    connectedYears = np.array([paper.year for paper in connectedPapers if hasattr(paper,'year')], dtype=int)
-    allYears = np.array([paper.year for paper in articleList if hasattr(paper,'year')], dtype=int)
-    # I could just loop through the unconnected papers and see if any of them reference any of the
-    # connected papers.
-    connectedSet = set(connectedPapers)
-    if np.max(connectedYears) < np.max(allYears):
-        unconnArticles = list(set(articleList) - set(connectedPapers))
-        for unArticle in unconnArticles:
-            refs = unArticle.references
-            # are there any references to articles in the connected blob?
-            refback = list(set(refs) & connectedSet)
-            for ref in refback:
-                paperGraph.add_edge(unArticle.bibcode,
-                                    ref.bibcode)
-                connectedBibcodes = nx.node_connected_component(paperGraph, anchorArticle.bibcode)
-                connectedPapers = [bibcodeDict[paperbibcode] for paperbibcode in connectedBibcodes]
-                connectedYears = np.array([paper.year for paper in connectedPapers if
-                                           hasatttr(paper,'year')], dtype=int)
-                if np.max(connectedYears) == np.max(allYears):
-                    return connectedPapers, paperGraph
-
     return connectedPapers, paperGraph
 
 def affClean(aff):
@@ -243,7 +216,7 @@ def checkAffMatch(aff1,aff2, matchThresh=0.70):
 def checkAuthorMatch(article1,article2,authorName=None,
                      yearGap=2, nCommonAuths=3,
                      matchThresh=0.70, absMatchLimit=0.5,
-                     titleMatchLimit=0.5):
+                     titleMatchLimit=0.5, keywordMatchTol=2):
     """
     Check if two articles are probably from the same author.
 
@@ -255,6 +228,8 @@ def checkAuthorMatch(article1,article2,authorName=None,
     3) They share nCommonAuths or more
     or
     4) Author lists are >1 and have the same names.
+    or
+    5) Author of interest is spelled exactly the same, and they share 2+ keywords
 
     matchThresh sets the theshold for doing fuzzy string comparison with the
     affiliation names (so, 'Univeristy of Washington' will match
@@ -281,7 +256,7 @@ def checkAuthorMatch(article1,article2,authorName=None,
         if np.abs(int(article1.year)-int(article2.year)) <= yearGap:
             aff1 = None
             aff2 = None
-            lDists = [levenshtein(authorName,authSimple(name)) for
+            lDists = [levenshtein(unicode(authorName),unicode(authSimple(name))) for
                       name in article1.author]
             good = np.where(lDists == np.min(lDists))[0]
             # Can't tell which one is author, can't link it up.
@@ -289,7 +264,7 @@ def checkAuthorMatch(article1,article2,authorName=None,
                 return False
             if lDists[good] < 3:
                 aff1 = affClean(article1.aff[good])
-            lDists = [levenshtein(authorName,authSimple(name)) for
+            lDists = [levenshtein(unicode(authorName),unicode(authSimple(name))) for
                       name in article2.author]
             good = np.where(lDists == np.min(lDists))[0]
             if np.size(good) > 1:
@@ -304,6 +279,16 @@ def checkAuthorMatch(article1,article2,authorName=None,
     commonAuthors = article1.authorset.intersection(article2.authorset)
     if len(commonAuthors) >= nCommonAuths:
         return True
+
+    # If the keywords are in common
+    if len(set(article1.keyword) & set(article2.keyword)) > keywordMatchTol:
+        # If the author is spelled exactly the same, and there are matching keywords
+        a1 = [author for author in article1.author if authSimple(author) == authSimple(authorName)]
+        a2 = [author for author in article2.author if authSimple(author) == authSimple(authorName)]
+        if (len(a1) == 1) & (len(a2) ==1):
+            # If the names match exactly
+            if a1[0] == a2[0]:
+                return True
 
     return result
 
