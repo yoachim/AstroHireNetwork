@@ -451,7 +451,7 @@ def phdArticle2row(phdArticle, yearsPrePhD=7, verbose=False, checkUSA=True,
     titles = []
     if len(ack) > 1:
         # Make sure the titles are different
-        titles = set([paper.title[0].lower() for paper in ack])
+        titles = set([paper.title[0].lower() for paper in ack if hasattr(paper, 'title')])
     if len(titles) > 1:
         if verbose:
             print authSimple(phdArticle.author[0])+' returns multiple PhDT.'
