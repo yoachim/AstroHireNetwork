@@ -112,6 +112,11 @@ def linkCheck():
 
 def exampleNetworks():
     names = ['Yoachim, P', 'Bellm, E', 'Williams, B', 'Williams, B','Wetzel, A', 'Capelo, P']
+    # add some caching so it only querries once.
+    if not hasattr(exampleNetworks,'results'):
+        exampleNetworks.results = [None for name in names]
+        exampleNetworks.graphs = [None for name in names]
+
     years = [2007, 2011, 2002, 2010, 2010,2012]
     texts = ['(a)', '(b)','(c)', '(d)','(e)','(f)']
     count = 1
@@ -121,8 +126,13 @@ def exampleNetworks():
         fig,ax = plt.subplots()
         phdA =  list(ads.query('bibstem:*PhDT', authors=name, dates=year,
                                database='astronomy', rows='all'))
-
-        result,graph = phdArticle2row(phdA[0], checkUSA=False, verbose=True, returnNetwork=True)
+        if exampleNetworks.results[count-1] is None:
+            result, graph = phdArticle2row(phdA[0], checkUSA=False, verbose=True, returnNetwork=True)
+            exampleNetworks.results[count-1] = result
+            exampleNetworks.graphs[count-1] = graph
+        else:
+            result = exampleNetworks.results[count-1]
+            graph = exampleNetworks.graphs[count-1]
         nx.draw_spring(graph, ax=ax)
         ax.text(.1,.8, txt, fontsize=24, transform=ax.transAxes)
         figs.append(fig)
@@ -250,12 +260,18 @@ if __name__ == '__main__':
     parser.add_argument('--plot4', dest='plot4', action='store_true')
     parser.add_argument('--network', dest='network', action='store_true')
     parser.add_argument('--linkCheck', dest='linkCheck', action='store_true')
+    parser.add_argument('--all', dest='all', action='store_true')
 
     parser.set_defaults(plot1=False,plot2=False,plot3=False,
                         plot4=False, network=False, linkCheck=False)
 
     args = parser.parse_args()
+    darg = vars(args)
+    if args.all:
+        for key in darg.keys():
+            darg[key] = True
 
+    import pdb ;
     passed_kwargs = dict(plot1=args.plot1,
               plot2=args.plot2,
               plot3=args.plot3,
