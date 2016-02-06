@@ -111,7 +111,7 @@ def linkCheck():
 
 
 def exampleNetworks():
-    names = ['Yoachim, P', 'Bellm, E', 'Williams, B', 'Williams, B','Wetzel, A', 'Capelo, P']
+    names = ['Yoachim, P', 'Bellm, E', 'Williams, B', 'Williams, B', 'Ostrowski, D', 'Capelo, P']
     # add some caching so it only querries once.
     if not hasattr(exampleNetworks,'results'):
         exampleNetworks.results = [None for name in names]
@@ -133,7 +133,7 @@ def exampleNetworks():
         else:
             result = exampleNetworks.results[count-1]
             graph = exampleNetworks.graphs[count-1]
-        nx.draw_spring(graph, ax=ax)
+        nx.draw_spring(graph, ax=ax, node_size=100)
         ax.text(.1,.8, txt, fontsize=24, transform=ax.transAxes)
         figs.append(fig)
         filenames.append('example_network_%i' %count)
@@ -293,4 +293,4 @@ if __name__ == '__main__':
 
 
     spp.plot_multi_format(funcs, plot_kwargs=kwargs,
-                          usetex=False, outdir='temp')
+                          usetex=False, outdir='../plots')

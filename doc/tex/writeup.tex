@@ -29,8 +29,6 @@
 Seattle WA, 98195; {yoachim@uw.edu} }
 
 
-
-
 \begin{abstract}
 blah blah blah, abstract
 
@@ -40,9 +38,7 @@ blah blah blah, abstract
 
 \section{TO DO}
 \begin{itemize}
-  \item{re-pull everyone with my new keyword+ author tester.}
-\item{note use of leven to match author names in cases where accents may have been converted in some journals. }
-  \item{make my set of matplotlibrc files and a script to run them all}
+  \item{Should I try dropping Icarus from the astro definition? }
 \end{itemize}
 
 \section{Introduction}
@@ -71,13 +67,17 @@ For each US PhD, we then query ADS for all entries with the PhD author's last na
 
 For common names (e.g.,  Williams, B), our author query returns entries from multiple authors.  To try and restrict the results to only those papers with the same author as the PhD thesis, we construct a network graph of the ADS entries using \citet{networkx}.
 
+There can be variations in how author names are spelled, including capitalization variations (VanderPlas and Vanderplas) as well as variation in accent characters.  To ensure we match authors correctly, we allow authors to match as long as they have a Levenshtein distance less than three.
+
 Every ADS entry is a node in our network. We draw an edge between nodes if they meet any of the following criteria:
+
 \begin{itemize}
 \item{If the affiliation of the thesis author matches, and the year of the entry is within 2 years.}
 \item{If the entries have 3 or more authors in common in their author lists.}
 \item{If there are two authors and they are identical on the two entries.}
-\item{If the information contained in the abstracts are similar enough as measured by XXX-magic fucking black boxXXX TfidfVectorizer from \citet{scikit-learn}}
-  \item{If the information contained in the titles of the entries are similar enough.}
+\item{If the information contained in the abstracts are similar enough (ratio $> 0.5$) as measured by XXX-magic fucking black boxXXX TfidfVectorizer from \citet{scikit-learn}}
+\item{If the information contained in the titles of the entries are similar enough.}
+  \item{If the relevant author's name matches exactly, and the entries share two keywords.}
 \end{itemize}
 
 For our affiliation matching, we consider the affiliations to match if one affiliation is contained in the other.  For example, ``The University of Washington'' is considered a match to ``Department of Astronomy, University of Washington, Box 351580''.  We also compare the two affiliation strings with the python difflib SequenceMatcher, and consider any affiliations that have a similarity ratio greater than 0.7 as matching.  For example ``Berkeley'' and ``UC Berkeley'' have a ratio of 0.8, and would thus be considred matching.
@@ -121,18 +121,17 @@ One known issue is that ADS does not contain all Astronomy PhD dissertations. We
 
 
 \begin{figure*}
-  \plottwo{../../plots/example_network_1.pdf}{../../plots/example_network_2.pdf}\\
-    \plottwo{../../plots/example_network_3.pdf}{../../plots/example_network_4.pdf}
-        \caption{Examples of network graphs constructed to find papers linked to individual PhD thesis entries in ADS.   Top Left: Network of ADS entries with the same author as \citet{Yoachim07} (45 entries, 43 linked to the PhD), Top Right: Network for \citet{Bellm2011} (103 entries, 97 linked), Bottom Left: Network for \citet{Williams02}, (313 papers, 268 linked) Bottom Right: Network for \citet{Williams11} (157 papers, 111 linked).  Note, none of the linked papers for the two Williams PhDs overlap. \label{fig:example_networks}}
+  \plottwo{../../plots/single_example_network_1.pdf}{../../plots/single_example_network_2.pdf}\\
+    \plottwo{../../plots/single_example_network_3.pdf}{../../plots/single_example_network_4.pdf}
+        \caption{Examples of network graphs constructed to find papers linked to individual PhD thesis entries in ADS.   (a) Network of ADS entries with the same author as \citet{Yoachim07} (45 entries, 43 linked to the PhD), (b) Network for \citet{Bellm2011} (103 entries, 97 linked),(c) Network for \citet{Williams02}, (313 papers, 268 linked) (d) Network for \citet{Williams11} (157 papers, 111 linked).  Note, none of the linked papers for the two Williams, B PhDs overlap. \label{fig:example_networks}}
 \end{figure*}
 
 \begin{figure*}
-  \plottwo{../../plots/example_network_5.pdf}{../../plots/example_network_6.pdf}
-  \caption{Example of an ADS networks that suffers from under-linking.  Left: Only 11 of the 29 entries can be linked back to \citet{Wetzel10}.  Right: The under-linked network of \citet{Capelo12}.  A single ADS entry in the future could link a network back together.}
+  \plottwo{../../plots/single_example_network_5.pdf}{../../plots/single_example_network_6.pdf}
+  \caption{Example of an ADS networks that suffers from under-linking.  (e) Only 20 of the 24 entries can be linked back to \citet{Ostrowski10}, but that results in a three year gap (2012 vs 2015).  (f) The under-linked network of \citet{Capelo12}.  A single ADS entry in the future could link a network back together.}
 \end{figure*}
 
 % Do any of those Williams papers overlap? NO not a one! Wow. Must be using middle initials.
-
 
 Possible ways we could fail to recognize an author has published for as long as they actually have
 \begin{itemize}
@@ -154,7 +153,7 @@ Thus there are two types of errors that can skew our results, over-linking our n
 Using the less-common name subset, we can also test for under-linking by assuming the names are unique and all the ADS entries returned for a name search should be linked.  The results of the unique name tests are shown in Figure~\ref{fig:unames}. We find little evidence of under-linking. Comparing the less-common name results changes the retention rate by only $\sim4$\%. When we test for under-linking, we find recent PhDs could be suffering from under-linking at the 5-10\% level, while older PhDs suffer under-linking at lower rates (2-5\%).  This should be slightly expected, as younger astronomers typically change institutions, and many will have not yet published papers that link back to their previously established cloud.  The important aspect is that the relative over- and under-linking between PhD cohorts is similar.  Thus, the recent dramatic (20\%) drop we observe in astronomer retention is real and not an artifact of how we assign ADS entries to authors.
 
 \begin{figure}
-  \plotone{../../plots/linkCheck.pdf}
+  \plotone{../../plots/single_linkCheck.pdf}
   \caption{\label{fig:unames}}
   \end{figure}
 
@@ -167,19 +166,20 @@ To test how much we are affected by over-linking ADS entries, we compare the ret
 
 
 \begin{figure}
-  \plotone{../../plots/phdsperyear.pdf}
+  \plotone{../../plots/single_phdsperyear.pdf}
   \caption{Number of US Astronomy PhD thesis entries found in ADS per year. \label{fig:phdperyear}}
 \end{figure}
 
-\begin{figure}
-  \plotone{../../plots/active_curves.pdf}
-  \plotone{../../plots/linkCheck_errorbars.pdf}
+\begin{figure*}
+  \plotone{../../plots/span_active_curves.pdf}
+  \plotone{../../plots/span_linkCheck_errorbars.pdf}
   \caption{ Hmm, plain or with error-bars? \label{fig:active_curves}}
-  \end{figure}
+  \end{figure*}
+
 
 
 \begin{figure}
-  \plotone{../../plots/retention_by_class.pdf}
+  \plotone{../../plots/single_retention_by_class.pdf}
   \caption{The 4, 6, and 10 year retention fractions as a function of PhD cohort year.\label{fig:retention}}
 \end{figure}
 
