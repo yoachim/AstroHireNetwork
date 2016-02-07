@@ -38,7 +38,8 @@ def inAstroJ(toTest):
                                 'Astrophysical Journal', 'AJ'
                                 'Astronomical Journal' 'ApJ',
                                 'Monthly Notices of the Royal Astronomical Society','MNRAS',
-                                'Icarus',
+                                'Publications of the Astronomical Society of the Pacific', 'PASP',
+                                 #'Icarus',
                                 'American Astronomical Society', 'AAS',
                                 'International Astronomical Union', 'IAU'
     ]
