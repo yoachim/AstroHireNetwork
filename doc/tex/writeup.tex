@@ -38,7 +38,7 @@ blah blah blah, abstract
 
 \section{TO DO}
 \begin{itemize}
-  \item{Should I try dropping Icarus from the astro definition? }
+  \item{Maybe only go back to 97-98 and add that curve to the plots? }
 \end{itemize}
 
 \section{Introduction}
@@ -126,10 +126,10 @@ One known issue is that ADS does not contain all Astronomy PhD dissertations. We
         \caption{Examples of network graphs constructed to find papers linked to individual PhD thesis entries in ADS.   (a) Network of ADS entries with the same author as \citet{Yoachim07} (45 entries, 43 linked to the PhD), (b) Network for \citet{Bellm2011} (103 entries, 97 linked),(c) Network for \citet{Williams02}, (313 papers, 268 linked) (d) Network for \citet{Williams11} (157 papers, 111 linked).  Note, none of the linked papers for the two Williams, B PhDs overlap. \label{fig:example_networks}}
 \end{figure*}
 
-\begin{figure*}
-  \plottwo{../../plots/single_example_network_5.pdf}{../../plots/single_example_network_6.pdf}
-  \caption{Example of an ADS networks that suffers from under-linking.  (e) Only 20 of the 24 entries can be linked back to \citet{Ostrowski10}, but that results in a three year gap (2012 vs 2015).  (f) The under-linked network of \citet{Capelo12}.  A single ADS entry in the future could link a network back together.}
-\end{figure*}
+\begin{figure}
+  \plotone{../../plots/single_example_network_5.pdf}
+  \caption{Example of an ADS networks that suffers from under-linking.  (e) The under-linked network of \citet{Capelo12}.  A single ADS entry in the future could link a network back together.}
+\end{figure}
 
 % Do any of those Williams papers overlap? NO not a one! Wow. Must be using middle initials.
 
@@ -150,11 +150,11 @@ Ways we could mistakenly claim an author has published for longer than they actu
 
 Thus there are two types of errors that can skew our results, over-linking our networks, connecting ADS entries that are not actually by the same author and under-linking, where we fail to recognize entries that are by the same author.  To look for the effects of over- and under-linking, we flag authors where the ADS database only lists one PhD thesis as matching their last name, and first initial. These represent less-common names that should suffer much lower rates of over-linking.
 
-Using the less-common name subset, we can also test for under-linking by assuming the names are unique and all the ADS entries returned for a name search should be linked.  The results of the unique name tests are shown in Figure~\ref{fig:unames}. We find little evidence of under-linking. Comparing the less-common name results changes the retention rate by only $\sim4$\%. When we test for under-linking, we find recent PhDs could be suffering from under-linking at the 5-10\% level, while older PhDs suffer under-linking at lower rates (2-5\%).  This should be slightly expected, as younger astronomers typically change institutions, and many will have not yet published papers that link back to their previously established cloud.  The important aspect is that the relative over- and under-linking between PhD cohorts is similar.  Thus, the recent dramatic (20\%) drop we observe in astronomer retention is real and not an artifact of how we assign ADS entries to authors.
+Using the less-common name subset, we can also test for under-linking by assuming the names are unique and all the ADS entries returned for a name search should be linked.  The results of the unique name tests are shown in Figure~\ref{fig:unames}. We find little evidence of under-linking. Comparing the less-common name results changes the retention rate by only $\sim4$\%. When we test for under-linking, we find recent PhDs could be suffering from under-linking at the 5-8\% level, while older PhDs suffer under-linking at lower rates (2-4\%).  This should be slightly expected, as younger astronomers typically change institutions, and many will have not yet published papers that link back to their previously established cloud.  The important aspect is that the relative over- and under-linking between PhD cohorts is similar.  Thus, the recent dramatic (20\%) drop we observe in astronomer retention is real and not an artifact of how we assign ADS entries to authors.
 
 \begin{figure}
   \plotone{../../plots/single_linkCheck.pdf}
-  \caption{\label{fig:unames}}
+  \caption{Solid lines show the residuals when comparing to retention curves constructed with unique names (e.g., a sub-sample that should suffer from little to no over-linking).  The dashed lines shows the comparision to unique names when the unique name group is assumed to have a completely linked network (e.g., a subsample that suffers from little to no under-linking).  \label{fig:unames}}
   \end{figure}
 
 

@@ -111,19 +111,20 @@ def linkCheck():
 
 
 def exampleNetworks():
-    names = ['Yoachim, P', 'Bellm, E', 'Williams, B', 'Williams, B', 'Ostrowski, D', 'Capelo, P']
+    names = ['Yoachim, P', 'Bellm, E', 'Williams, B', 'Williams, B', 'Capelo, P']
     # add some caching so it only querries once.
     if not hasattr(exampleNetworks,'results'):
         exampleNetworks.results = [None for name in names]
         exampleNetworks.graphs = [None for name in names]
 
-    years = [2007, 2011, 2002, 2010, 2010,2012]
-    texts = ['(a)', '(b)','(c)', '(d)','(e)','(f)']
+    years = [2007, 2011, 2002, 2010, 2012]
+    texts = ['(a)', '(b)','(c)', '(d)','(e)']
     count = 1
     figs = []
     filenames = []
     for name,year,txt in zip(names,years,texts):
         fig,ax = plt.subplots()
+        figDummy, axDummy = plt.subplots()
         phdA =  list(ads.query('bibstem:*PhDT', authors=name, dates=year,
                                database='astronomy', rows='all'))
         if exampleNetworks.results[count-1] is None:
@@ -133,7 +134,15 @@ def exampleNetworks():
         else:
             result = exampleNetworks.results[count-1]
             graph = exampleNetworks.graphs[count-1]
-        nx.draw_spring(graph, ax=ax, node_size=100)
+        years = []
+        for node in graph.nodes():
+            years.append(float(node[0:4]))
+
+        years = np.array(years)
+        nx.draw_spring(graph, ax=ax, node_size=100, node_color=years, alpha=0.5)
+        mappableDummy = axDummy.scatter(years,years,c=years)
+        cbar = plt.colorbar(mappableDummy, ax=ax, format='%i')
+        cbar.set_label('Year')
         ax.text(.1,.8, txt, fontsize=24, transform=ax.transAxes)
         figs.append(fig)
         filenames.append('example_network_%i' %count)
