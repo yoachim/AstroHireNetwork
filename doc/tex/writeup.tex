@@ -55,7 +55,7 @@ Unfortunately, some astronomers still espouse the theory that ``... the [astrono
 
 XXX-description of ADS, how it includes peer-reviewed papers as well as things like conference proceedings, posters, grants, etc.
 
-\section{Database Construction}
+\section{Database Construction}\label{sec:db_construct}
 
 All the code used for this paper is available on github\footnote{\url{https://github.com/yoachim/AstroHireNetwork}}
 
@@ -171,11 +171,15 @@ To test how much we are affected by over-linking ADS entries, we compare the ret
 \end{figure}
 
 \begin{figure*}
-  \plotone{../../plots/span_active_curves.pdf}
   \plotone{../../plots/span_linkCheck_errorbars.pdf}
-  \caption{ Hmm, plain or with error-bars? \label{fig:active_curves}}
+  \caption{Plot of how long PhD astronomers stay active in the ADS archive.  Error bars are set by comparing to a subset of astronomers with more unique names as outlined in \S\ref{sec:db_construct}.   \label{fig:active_curves}}
   \end{figure*}
 
+
+\begin{figure*}
+  \plotone{../../plots/span_linkCheck_errorbars_1stA.pdf}
+  \caption{Like Figure~\ref{fig:active_curves}, but now using the most recent connected paper where the author is the first author.  The dashed lines show the curves from Figure~\ref{fig:active_curves} for comparison. The downturn in the older curves (1999-2004) could be an artifact caused by astronomers who lead a paper only every few years, e.g., two years from now those curves could rise back up.  \label{fig:1stA_active}}
+\end{figure*}
 
 
 \begin{figure}

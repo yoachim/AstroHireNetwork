@@ -39,11 +39,17 @@ def retentionCurve(latest_years, phd_years):
     return curve,bins[:-1][good]+.5
 
 
-def linkCheck():
+def linkCheck(firstA=False):
     """
     Check to see if we are over or under-linking papers using the
     unique name flag
     """
+    if firstA:
+        latest_key = 'latest_1st_year'
+    else:
+        latest_key = 'latest_year'
+
+
     figs = []
     names = []
     data = readYear(0, filename = 'output/all_years.dat')
@@ -65,11 +71,12 @@ def linkCheck():
         good = np.where((data['phd_year'] >= ymin)
                         & (data['phd_year'] <= ymax))
 
-        baseline, bins1 = retentionCurve(data[good]['latest_year'],data[good]['phd_year'])
+        baseline, bins1 = retentionCurve(data[good][latest_key],data[good]['phd_year'])
+        anybaseline, bins1 = retentionCurve(data[good]['latest_year'],data[good]['phd_year'])
         good = np.where((data['phd_year'] >= ymin)
                         & (data['phd_year'] <= ymax) &
                         (data['uniqueName'] == 'True') )
-        test1,bins2 = retentionCurve(data[good]['latest_year'],data[good]['phd_year'])
+        test1,bins2 = retentionCurve(data[good][latest_key],data[good]['phd_year'])
         test2,bins3 = retentionCurve(data[good]['latest_year_unlinked'],data[good]['phd_year'])
         ax.plot(bins1, test1-baseline, '-', label='%i-%i' % (ymin,ymax),
                 color=color)
@@ -88,24 +95,42 @@ def linkCheck():
                 yerr[1].append(max_resid)
             else:
                 yerr[1].append(0)
+        if firstA:
+            ax2.plot(bins1,baseline,
+                         color=color, label='%s-%s' % (str(ymin)[-2:],str(ymax)[-2:]))
+            ax2.plot(bins1, anybaseline,'--', color=color)
+        else:
+            ax2.errorbar(bins1,baseline, yerr=yerr, ecolor=color,
+                         color=color, fmt='-o', label='%s-%s' % (str(ymin)[-2:],str(ymax)[-2:]),
+                         alpha=.8)
 
-        ax2.errorbar(bins1,baseline, yerr=yerr, ecolor=color,
-                     color=color, fmt='-o', label='%i-%i' % (ymin,ymax),
-                     alpha=.8)
 
-
-    ax.legend(numpoints=1)
+    ax.legend(numpoints=1, ncol=2)
     ax.set_xlabel('Years post PhD')
-    ax.set_ylabel('Active Fraction - Unique Name Active Fraction')
-    figs.append(fig)
-    names.append('linkCheck')
+    if firstA:
+        ax.set_ylabel('Active Fraction - Unique Name Active Fraction')
+        figs.append(fig)
+        names.append('linkCheck_1stA')
 
-    ax2.legend(numpoints=1)
-    ax2.set_xlim([0,17])
-    ax2.set_xlabel('Years post PhD')
-    ax2.set_ylabel('Fraction Still Active in ADS')
-    figs.append(fig2)
-    names.append('linkCheck_errorbars')
+    else:
+        ax.set_ylabel('Active Fraction - Unique Name Active Fraction')
+        figs.append(fig)
+        names.append('linkCheck')
+
+    if firstA:
+        ax2.legend(numpoints=1)
+        ax2.set_xlim([0,17])
+        ax2.set_xlabel('Years post PhD')
+        ax2.set_ylabel('Fraction Still 1st Authors in ADS')
+        figs.append(fig2)
+        names.append('linkCheck_errorbars_1stA')
+    else:
+        ax2.legend(numpoints=1)
+        ax2.set_xlim([0,17])
+        ax2.set_xlabel('Years post PhD')
+        ax2.set_ylabel('Fraction Still Active in ADS')
+        figs.append(fig2)
+        names.append('linkCheck_errorbars')
 
     return figs, names
 
@@ -223,6 +248,8 @@ def makePlots(plot1=False, plot2=False, plot3=False, plot4=False):
         fig,name = curvePlot(data,good, filename, title)
         figs.extend(fig)
         names.extend(name)
+
+
     if plot3:
         filename = 'active_curves_uname'
         good = np.where((data['noAstroJournal'] == 'None') &
@@ -299,6 +326,8 @@ if __name__ == '__main__':
     if args.linkCheck:
          funcs.append(linkCheck)
          kwargs.append({})
+         funcs.append(linkCheck)
+         kwargs.append({'firstA':True})
 
 
     spp.plot_multi_format(funcs, plot_kwargs=kwargs,
