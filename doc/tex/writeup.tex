@@ -155,10 +155,10 @@ Thus there are two types of errors that can skew our results, over-linking our n
 
 Using the less-common name subset, we can also test for under-linking by assuming the names are unique and all the ADS entries returned for a name search should be linked.  The results of the unique name tests are shown in Figure~\ref{fig:unames}. We find little evidence of under-linking. Comparing the less-common name results changes the retention rate by only $\sim4$\%. When we test for under-linking, we find recent PhDs could be suffering from under-linking at the 5-8\% level, while older PhDs suffer under-linking at lower rates (2-4\%).  This should be slightly expected, as younger astronomers typically change institutions, and many will have not yet published papers that link back to their previously established cloud.  The important aspect is that the relative over- and under-linking between PhD cohorts is similar.  Thus, the recent dramatic (20\%) drop we observe in astronomer retention is real and not an artifact of how we assign ADS entries to authors.
 
-\begin{figure}
-  \plotone{../../plots/single_linkCheck.pdf}
+\begin{figure*}
+  \plotone{../../plots/span_linkCheck.pdf}
   \caption{Solid lines show the residuals when comparing to retention curves constructed with unique names (e.g., a sub-sample that should suffer from little to no over-linking).  The dashed lines shows the comparision to unique names when the unique name group is assumed to have a completely linked network (e.g., a subsample that suffers from little to no under-linking).  \label{fig:unames}}
-  \end{figure}
+  \end{figure*}
 
 
 It is worth emphasizing that while there are undoubtedly some cases where we have not accurately recorded an astronomer, we do not suffer the selection biases that go with survey-based studies and that our errors should be similar across PhD cohorts, thus we can draw strong conclusions about the relative differences between PhD classes.
