@@ -60,8 +60,8 @@ def linkCheck(firstA=False):
     data = data[good]
 
     binsize = 2
-    year_mins = np.arange(1999,2011+binsize,binsize)
-    year_maxes = np.arange(2000,2012+binsize,binsize)
+    year_mins = np.arange(1997,2011+binsize,binsize)
+    year_maxes = np.arange(1998,2012+binsize,binsize)
     fig,ax = plt.subplots()
     fig2,ax2 = plt.subplots()
 
@@ -196,8 +196,8 @@ def curvePlot(data,good, filename, title):
 
     # Let's bin things up by 2's
     binsize = 2
-    year_mins = np.arange(1999,2011+binsize,binsize)
-    year_maxes = np.arange(2000,2012+binsize,binsize)
+    year_mins = np.arange(1997,2011+binsize,binsize)
+    year_maxes = np.arange(1998,2012+binsize,binsize)
     fig,ax = plt.subplots()
     bins = np.arange(0,30,1)-0.5
 
@@ -229,9 +229,11 @@ def makePlots(plot1=False, plot2=False, plot3=False, plot4=False):
 
     data = readYear(0, filename = 'output/all_years.dat')
 
+    min_year = 1997
     # Make a histogram of number of PhDs per year
     good = np.where((data['noAstroJournal'] == 'None') &
-                    (data['nonUS'] == 'None'))
+                    (data['nonUS'] == 'None') &
+                    (data['phd_year'] >= min_year))
     bins = np.arange(data['phd_year'][good].min()-.5, data['phd_year'][good].max()+1.5,1)
 
     if plot1:
