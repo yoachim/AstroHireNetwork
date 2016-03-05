@@ -164,7 +164,12 @@ def exampleNetworks():
             years.append(float(node[0:4]))
 
         years = np.array(years)
-        nx.draw_spring(graph, ax=ax, node_size=100, node_color=years, alpha=0.5)
+        # Make the graph repeatable
+        pos = {}
+        for i, node in enumerate(graph.nodes):
+            pos[node] = (0,i)
+        nx.draw_spring(graph, pos=pos, ax=ax, node_size=100,
+                       node_color=years, alpha=0.5)
         mappableDummy = axDummy.scatter(years,years,c=years)
         cbar = plt.colorbar(mappableDummy, ax=ax, format='%i')
         cbar.set_label('Year')
@@ -309,7 +314,6 @@ if __name__ == '__main__':
         for key in darg.keys():
             darg[key] = True
 
-    import pdb ;
     passed_kwargs = dict(plot1=args.plot1,
               plot2=args.plot2,
               plot3=args.plot3,

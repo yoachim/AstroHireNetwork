@@ -75,7 +75,7 @@ There can be variations in how author names are spelled, including capitalizatio
 Every ADS entry is a node in our network. We draw an edge between nodes if they meet any of the following criteria:
 
 \begin{itemize}
-\item{If the affiliation of the thesis author matches, and the year of the entry is within 2 years.}
+\item{If the affiliations (of the possible thesis author) match, and the entries have publication years within 2 years or each other.}
 \item{If the entries have 3 or more authors in common in their author lists.}
 \item{If there are two authors and they are identical on the two entries.}
 \item{If the information contained in the abstracts are similar enough (ratio $> 0.5$) as measured by XXX-magic fucking black boxXXX TfidfVectorizer from \citet{scikit-learn}}
@@ -83,13 +83,16 @@ Every ADS entry is a node in our network. We draw an edge between nodes if they 
   \item{If the relevant author's name matches exactly, and the entries share two keywords.}
 \end{itemize}
 
-For our affiliation matching, we consider the affiliations to match if one affiliation is contained in the other.  For example, ``The University of Washington'' is considered a match to ``Department of Astronomy, University of Washington, Box 351580''.  We also compare the two affiliation strings with the python difflib SequenceMatcher, and consider any affiliations that have a similarity ratio greater than 0.7 as matching.  For example ``Berkeley'' and ``UC Berkeley'' have a ratio of 0.8, and would thus be considred matching.
+For our affiliation matching, we consider the affiliations to match if one affiliation is contained in the other.  For example, ``The University of Washington'' is considered a match to ``Department of Astronomy, University of Washington, Box 351580'' but not ``Washington University''.  We also compare the two affiliation strings with the python difflib SequenceMatcher, and consider any affiliations that have a similarity ratio greater than 0.7 as matching.  For example ``Berkeley'' and ``UC Berkeley'' have a ratio of 0.8, and would thus be considred matching.
 
-This is a rather similar codification of the common-sense process one would take to guess if it is the same author on two papers. With services such as ORCID\footnote{\url{http://orcid.org/}}, it should be possible to build a training set of papers known to be linked to a single author as a training set for machine learning algorithms.  
+This is a rather similar codification of the common-sense process one would take to guess if it is the same author on two papers. With services such as ORCID\footnote{\url{http://orcid.org/}}, it should be possible to build a network of papers known to be linked to a single author as a training set for machine learning algorithms.  
 
-We then select only the entries which are linked to the PhD thesis of interest.  Some example ADS entry network graphs are shown in Figure~\ref{fig:example_networks}.
+As the final step, we select only the entries which are linked to the PhD thesis of interest.  Some example ADS entry network graphs are shown in Figure~\ref{fig:example_networks}.
 
-Once we have selected only those entries we believe are connected to the correct thesis author, we demand that at least one of the entries be in a peer-reviewed astronomy journal or a contribution at a major astronomy conference (XXX-list of journals) to eliminate physics thesis entries.  The list of publications we use to label someone as an astronomer are listed in Table~\ref{table:journal_list}. We consider an ADS listed publication to be a match if any of our selected journals are contained in the publication string, e.g., ``Astrophysical Journal Letters'' would count as a match because it contains ``Astronomical Jounal'' which is in our list. 
+Once we have selected only those entries we believe are connected to the thesis author, we demand that at least one of the entries be in a peer-reviewed astronomy journal or a contribution at a major astronomy conference to eliminate physics thesis entries.  The list of publications we use to label someone as an astronomer are listed in Table~\ref{table:journal_list}. We consider an ADS listed publication to be a match if any of our selected journals are contained in the publication string, e.g., ``Astrophysical Journal Letters'' would count as a match because it contains ``Astronomical Jounal'' which is in our list.  This step is necissary to remove PhD authors who would be better classified as Physists, Geophysists, Planeteray Scientists, etc. 
+
+We do not limit our search to only first-author publications for either the publication graph construction or determining if the author meets our criterion for being labled an ``astronomer''.
+
 
 The ADS publication must match at least one of:
 \begin{deluxetable}{ll}
@@ -199,7 +202,7 @@ Figure~\ref{fig:active_curves} shows that recent PhDs are leaving the field much
 
 Another possibility is that few PhDs have first-author ADS entries every year. The cohorts from the 90's and early 00's all see marked downturns at the
 
-Note:  The curves looked weird if we included years before 1997. This could be because the job market was diffferent at that time, or it could be that ADS completeness changes. On their FAQ (\url{http://adsabs.harvard.edu/abs_doc/faq.html#complete}) ADS notes they transitioned to getting abstracts directly from journals in the middle of 1995.
+Note:  The curves looked weird if we included years before 1997. This could be because the job market was diffferent at that time, or it could be that ADS completeness changes. On their FAQ \footnote{\url{http://adsabs.harvard.edu/abs\_doc/faq.html}}, ADS notes they transitioned to getting abstracts directly from journals in the middle of 1995.
 
 Discuss the major dips in number of PhDs in 2009 and 2011.  The 2009 makes a bit of sense, as 2008 was a large year, and students might have been avoiding the bad economy.  Not sure about 2011, although that dip might be seen elswhere too?
 
@@ -216,6 +219,16 @@ There is also a mostly invisible effect on the field when the career potential d
 
 Given the sharp recent change in PhD retention seen in Figures~\ref{fig:1stA_active} and~\ref{fig:retention}, it is important to also consider the resulting impact the change will have on recruiting new graduate students. We never see the students who chose to not apply for graduate school. This is an important observational bias.  If astronomy PhD career prospects start to resemble Art History PhD career prospects, we might expect the technical skills of the two groups of graduate students to become more similar.  With poor career prospects, astronomy risks losing the ability to recruit top students. Law schools recently saw a drop in top student applications with the collapse of the legal job market (see \url{http://www.theatlantic.com/business/archive/2012/04/the-wrong-people-have-stopped-applying-to-law-school/255685/}).  
 
+
+\subsection{Future Work}
+
+The ability to identify individuals via their PhD and track their career progress via their apperance in ADS opens up a number of possible future studies including
+\begin{itemize}
+\item{Extending this analysis to other countries.}
+\item{For many author networks, it should be possible programatically guess the author's gender, alowing one to compare career trajectories based on gender.}
+\item{One could analyze the network of PhD granting institutions and final hiring institutions to rank the prestige of graduate programs as in \citet{Clausete15}.}
+\item{}
+\end{itemize}
 
 \section{Conclusions}
 Using the ADS, we find that retention of new Astronomy PhDs is at a 15+ year low.  
