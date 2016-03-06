@@ -38,12 +38,13 @@ blah blah blah, abstract
 
 \section{TO DO}
 \begin{itemize}
-  \item{Just write text! }
+\item{Just write text! }
+  \item{If I want error bars on my 1st author plot, need to remake and save ``latest unlinked 1st author year''.}
 \end{itemize}
 
 \section{Introduction}
 
-It is often difficult to determine the state of the Astronomy job market.  Analysis of the science job market often lumps all sciences together, in which case Biologists dominate the statistics, or, if the sciences are separated, Astronomy is usually grouped with Physics (e.g., the Bureau of Labor and Statistics lists 20,000 Physicists and Astronomers jobs in 2014 \footnote{\url{http://www.bls.gov/ooh/life-physical-and-social-science/physicists-and-astronomers.htm}}), where the number of Physicists outnumbers the Astronomers.  The American Astronomical Society currently lists it's membership at around 7,000.
+It is difficult to determine the state of the Astronomy job market.  Analysis of the science job market often lumps all sciences together, in which case Biologists dominate the statistics, or, if the sciences are separated, Astronomy is usually grouped with Physics (e.g., the Bureau of Labor and Statistics lists 20,000 Physicists and Astronomers jobs in 2014 \footnote{\url{http://www.bls.gov/ooh/life-physical-and-social-science/physicists-and-astronomers.htm}}), where the number of Physicists outnumbers the Astronomers.  The American Astronomical Society currently lists it's membership at around 7,000.
 
 \citet{Seth09} build on the work of \citet{Metcalfe08} and looks at the rise of the postdoc era in Astronomy and Astrophysics.  They show that as the inflation-adjusted US-Astronomy budget doubled over 20 years, there was a modest increase in PhD production and a huge rise in the number of temporary postdoc positions.
 
@@ -51,7 +52,7 @@ In this paper, we use the ADS to explore the ramifications of that rising postdo
 
 Thus, we propose to use the publication record of PhDs to track the overall health of the field.  
 
-Unfortunately, some astronomers still espouse the theory that ``... the [astronomy faculty job] market is no worse or better than it is has been for at least a decade or two'' (via Charfman \url{http://jjcharfman.tumblr.com/}).  The goal of this paper is to check this statement and quantify the astronomy job market by tracking the digital footprints Astronomers leave in ADS. 
+Unfortunately, some faculty still espouse the theory that, ``... the [astronomy faculty job] market is no worse or better than it is has been for at least a decade or two'' (via Charfman \url{http://jjcharfman.tumblr.com/}).  The goal of this paper is to check this statement and quantify the astronomy job market by tracking the digital footprints Astronomers leave in ADS. 
 
 XXX-description of ADS, how it includes peer-reviewed papers as well as things like conference proceedings, posters, grants, etc.
 
@@ -62,7 +63,7 @@ Example of current tracking here \url{https://www.aip.org/sites/default/files/st
 
 All the code used for this paper is available on github\footnote{\url{https://github.com/yoachim/AstroHireNetwork}}
 
-We use the excellent Python Module to Interact with NASA's ADS that Doesn't Suck™\footnote{\url{https://github.com/andycasey/ads}} to access records from the SAO/NASA Astrophysics Data System XXX--figure out proper way to cite code. 
+We use the excellent {\emph{Python Module to Interact with NASA's ADS that Doesn't Suck™}}\footnote{\url{https://github.com/andycasey/ads}} to access records from the SAO/NASA Astrophysics Data System XXX--figure out proper way to cite code. 
 
 Our procedure for building a database of Astronomy and Astrophysics PhDs is as follows.  We select all PhD Thesis records for a given year and screen to include only those records that have an affiliation in the United States.
 
@@ -70,7 +71,7 @@ For each US PhD, we then query ADS for all entries with the PhD author's last na
 
 For common names (e.g.,  Williams, B), our author query returns entries from multiple authors.  To try and restrict the results to only those papers with the same author as the PhD thesis, we construct a network graph of the ADS entries using \citet{networkx}.
 
-There can be variations in how author names are spelled, including capitalization variations (VanderPlas and Vanderplas) as well as variation in accent characters.  To ensure we match authors correctly, we allow authors to match as long as they have a Levenshtein distance less than three.
+There can be variations in how author names are spelled, including capitalization variations (e.g., VanderPlas and Vanderplas) as well as variation in accent characters.  To ensure we match authors correctly, we reduce all author names to the format ``first initial, last name'', and consider names to match if they have a Levenshtein distance less than three.
 
 Every ADS entry is a node in our network. We draw an edge between nodes if they meet any of the following criteria:
 
@@ -83,9 +84,9 @@ Every ADS entry is a node in our network. We draw an edge between nodes if they 
   \item{If the relevant author's name matches exactly, and the entries share two keywords.}
 \end{itemize}
 
-For our affiliation matching, we consider the affiliations to match if one affiliation is contained in the other.  For example, ``The University of Washington'' is considered a match to ``Department of Astronomy, University of Washington, Box 351580'' but not ``Washington University''.  We also compare the two affiliation strings with the python difflib SequenceMatcher, and consider any affiliations that have a similarity ratio greater than 0.7 as matching.  For example ``Berkeley'' and ``UC Berkeley'' have a ratio of 0.8, and would thus be considred matching.
+For our affiliation matching, we consider the affiliations to match if one affiliation is contained in the other.  For example, ``University of Washington'' is considered a match to ``Department of Astronomy, University of Washington, Box 351580'' but not ``Washington University''.  We also compare the two affiliation strings with the python difflib SequenceMatcher, and consider any affiliations that have a similarity ratio greater than 0.7 as matching.  For example ``Berkeley'' and ``UC Berkeley'' have a ratio of 0.8, and would thus be considred matching.
 
-This is a rather similar codification of the common-sense process one would take to guess if it is the same author on two papers. With services such as ORCID\footnote{\url{http://orcid.org/}}, it should be possible to build a network of papers known to be linked to a single author as a training set for machine learning algorithms.  
+This is a rather similar codification of the common-sense process one would take to infer if it is the same author on two papers. With author's being able to identify their papers with services such as ORCID\footnote{\url{http://orcid.org/}}, it should soon be possible to build a network of papers known to be linked to a single author as a training set for machine learning algorithms.  
 
 As the final step, we select only the entries which are linked to the PhD thesis of interest.  Some example ADS entry network graphs are shown in Figure~\ref{fig:example_networks}.
 
@@ -139,7 +140,7 @@ One known issue is that ADS does not contain all Astronomy PhD dissertations. We
 
 % Do any of those Williams papers overlap? NO not a one! Wow. Must be using middle initials.
 
-Possible ways we could fail to recognize an author has published for as long as they actually have
+Possible ways we could fail to recognize an author has published for as long as they actually have (i.e., networks are under-linked):
 \begin{itemize}
 \item{If someone simultaneously changes institution and area of study}
   \item{If an astronomer leaves the field for an extended time and re-joins in a different field}
@@ -147,7 +148,7 @@ Possible ways we could fail to recognize an author has published for as long as 
   \item{}
 \end{itemize}
 
-Ways we could mistakenly claim an author has published for longer than they actually have
+Ways we could mistakenly claim an author has published for longer than they actually have, we construct networks which suffer from over-linking:
 \begin{itemize}
 \item{If two authors have similar names and overlap at the same institution}
 \item{If two authors have similar names and similar reference lists in their papers}
@@ -208,7 +209,7 @@ Discuss the major dips in number of PhDs in 2009 and 2011.  The 2009 makes a bit
 
 \section{Discussion}
 
-{\bf{Astronomy is not suffering from a funding crisis, but rather a funding {\emph{allocation}} crisis.}} A simple thought experiment can help illustrate the problem. What would happen if the NSF was able to double it's Astronomy budget? Much of that money would be distributed as grants, that would then be used to hire graduate students and post docs. Very little of the money would go to funding permanent positions. Increasing federal astronomy funding would actually exacerbate PhD overproduction. 
+{\bf{The Astronomy labor market is not suffering from a funding crisis, but rather a funding {\emph{allocation}} crisis.}} A simple thought experiment can help illustrate the problem. What would happen if the NSF was able to double it's Astronomy budget? Much of that money would be distributed as grants, that would then be used to hire graduate students and post docs. Very little of the money would go to funding permanent positions. Increasing federal astronomy funding actually exacerbates PhD overproduction. 
 
 With a large increase in funding from XXXX to XXX, driven largely by NASA, there has been an increase in Astronomy PhD production with little to no increase in long-term positions for these PhDs.  This needs to be recognized as a failure of Astronomy funding agencies, as they paid to develop a talented workforce with no plans to retain that talent. Similarly, we must hold professional organizations responsible for failing to advocate for a funding stream allocated for the long-term health of the field.  
 
@@ -222,12 +223,12 @@ Given the sharp recent change in PhD retention seen in Figures~\ref{fig:1stA_act
 
 \subsection{Future Work}
 
-The ability to identify individuals via their PhD and track their career progress via their apperance in ADS opens up a number of possible future studies including
+The ability to identify individuals via their PhD and track their career progress via their apperances in ADS entries opens up a number of possible future studies including
 \begin{itemize}
-\item{Extending this analysis to other countries.}
-\item{For many author networks, it should be possible programatically guess the author's gender, alowing one to compare career trajectories based on gender.}
+\item{Extending this analysis to countries beyond the US.}
+\item{For many author networks, it should be possible to programatically guess the author's gender, alowing one to compare career trajectories based on gender.}
 \item{One could analyze the network of PhD granting institutions and final hiring institutions to rank the prestige of graduate programs as in \citet{Clausete15}.}
-\item{}
+\item{The technique of linking publication hsitories to PhDs can easily be extended to other fields.}
 \end{itemize}
 
 \section{Conclusions}
@@ -236,7 +237,7 @@ Using the ADS, we find that retention of new Astronomy PhDs is at a 15+ year low
 
 %--------------------------------------
 \acknowledgments
-Thanks everyone. Thanks to sponsors of AAS Hack Day 2016.
+Some work for this paper was done at the 2016 American Astronomical Association Hack Day. Thanks to sponsors of AAS Hack Day 2016, The Large Synoptic Survey Telescope and Northrop Grumman.
 
 This research has made use of NASA's Astrophysics Data System. Very heavy use.
 
