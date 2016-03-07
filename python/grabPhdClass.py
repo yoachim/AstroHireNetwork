@@ -57,7 +57,8 @@ def inAstroJ(toTest):
         pubs = []
         for article in toTest:
             if hasattr(article, 'pub'):
-                pubs.append(article.pub.lower())
+                if article.pub is not None:
+                    pubs.append(article.pub.lower())
                 # XXX--wait, I can just merge all these together, no need to do a nested loop.
         for pub in pubs:
             for astroPub in inAstroJ.journalList:
@@ -131,7 +132,10 @@ def authorGroup(articleList, anchorArticle, anchorAuthor,
     titles = []
     for paper in articleList:
         if hasattr(paper,'abstract'):
-            abstracts.append(paper.abstract)
+            if paper.abstract is not None:
+                abstracts.append(paper.abstract)
+            else:
+                abstracts.append('')
         else:
             abstracts.append('')
         if hasattr(paper,'title'):
@@ -282,14 +286,15 @@ def checkAuthorMatch(article1,article2,authorName=None,
         return True
 
     # If the keywords are in common
-    if len(set(article1.keyword) & set(article2.keyword)) > keywordMatchTol:
-        # If the author is spelled exactly the same, and there are matching keywords
-        a1 = [author for author in article1.author if authSimple(author) == authSimple(authorName)]
-        a2 = [author for author in article2.author if authSimple(author) == authSimple(authorName)]
-        if (len(a1) == 1) & (len(a2) ==1):
-            # If the names match exactly
-            if a1[0] == a2[0]:
-                return True
+    if (article1.keyword is not None) & (article2.keyword is not None):
+        if len(set(article1.keyword) & set(article2.keyword)) > keywordMatchTol:
+            # If the author is spelled exactly the same, and there are matching keywords
+            a1 = [author for author in article1.author if authSimple(author) == authSimple(authorName)]
+            a2 = [author for author in article2.author if authSimple(author) == authSimple(authorName)]
+            if (len(a1) == 1) & (len(a2) ==1):
+                # If the names match exactly
+                if a1[0] == a2[0]:
+                    return True
 
     return result
 
@@ -297,14 +302,20 @@ def grabPhdClass(year):
     """
     Return a list of all the phd thesis from a given year
     """
-    # OK, now how do I get all of them?--boom, rows='all'
-    ack = list(ads.query('bibstem:*PhDT', dates=year, database='astronomy', rows='all'))
+    ack = list(ads.query('bibstem:*PhDT', year=year, database='astronomy', rows=5000))
     return ack
 
-def authorsPapers(author, year=None):
+def authorsPapers(author, years=None):
     # Getting a problem with large querie I think
+    result = []
+    fl = ['aff', 'pub', 'abstract', 'author', 'first_author',
+          'bibcode', 'keyword', 'year', 'title', 'reference']
     try:
-        result = list(ads.query(authors=author, dates=year, database='astronomy', rows='all'))
+        if years is not None:
+            result.extend(list(ads.SearchQuery(q='year:%s'%years, author=author,
+                                               database='astronomy', rows=3000, fl=fl)))
+        else:
+            result.extend(list(ads.SearchQuery(author=author, database='astronomy', rows=3000, fl=fl)))
     except:
         print 'failed to query author: %s' % author.encode('utf-8')
         result = []
@@ -344,7 +355,7 @@ def phdArticle2row(phdArticle, yearsPrePhD=7, verbose=False, checkUSA=True,
 
     maxYear = datetime.date.today().year
     minYear = int(phdArticle.year) - yearsPrePhD
-    years = [minYear,maxYear] #range(minYear, maxYear+1) #str(minYear)+'-%i'% maxYear
+    years = '%i-%i'% (minYear,maxYear) #range(minYear, maxYear+1) #str(minYear)+'-%i'% maxYear
 
     result['name'] = authSimple(phdArticle.author[0])
     result['phd year'] = int(phdArticle.year)
@@ -362,7 +373,7 @@ def phdArticle2row(phdArticle, yearsPrePhD=7, verbose=False, checkUSA=True,
             return result
 
     # Query for all the papers by this author name
-    paperList = authorsPapers(phdArticle.author[0], year=years)
+    paperList = authorsPapers(phdArticle.author[0], years=years)
 
     if verbose:
         print 'Found %i papers' % len(paperList)
@@ -482,7 +493,7 @@ def test1():
     # can I do an author query with the
     article = uwGrads[-1]
     years = str(int(article.year)-yearsPrePhD)+'-%i'% maxYear
-    paperList = authorsPapers(article.author[0], year=years)
+    paperList = authorsPapers(article.author[0], years=years)
 
 def test15():
     """

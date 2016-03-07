@@ -98,7 +98,7 @@ def linkCheck(firstA=False):
         if firstA:
             ax2.plot(bins1,baseline,
                          color=color, label='%s-%s' % (str(ymin)[-2:],str(ymax)[-2:]))
-            ax2.plot(bins1, anybaseline,'--', color=color)
+            ax2.plot(bins1, anybaseline,'--', color=color, alpha=0.5)
         else:
             ax2.errorbar(bins1,baseline, yerr=yerr, ecolor=color,
                          color=color, fmt='-o', label='%s-%s' % (str(ymin)[-2:],str(ymax)[-2:]),
@@ -136,7 +136,7 @@ def linkCheck(firstA=False):
 
 
 def exampleNetworks():
-    names = ['Yoachim, P', 'Bellm, E', 'Williams, B', 'Williams, B', 'Capelo, P']
+    names = [u'Yoachim, P', u'Bellm, E', u'Williams, B', u'Williams, B', u'Capelo, P']
     # add some caching so it only querries once.
     if not hasattr(exampleNetworks,'results'):
         exampleNetworks.results = [None for name in names]
@@ -150,10 +150,10 @@ def exampleNetworks():
     for name,year,txt in zip(names,years,texts):
         fig,ax = plt.subplots()
         figDummy, axDummy = plt.subplots()
-        phdA =  list(ads.query('bibstem:*PhDT', authors=name, dates=year,
-                               database='astronomy', rows='all'))
+        phdA =  list(ads.SearchQuery(q=u'bibstem:*PhDT', author=name, year=year,
+                                     database='astronomy'))[-1]
         if exampleNetworks.results[count-1] is None:
-            result, graph = phdArticle2row(phdA[0], checkUSA=False, verbose=True, returnNetwork=True)
+            result, graph = phdArticle2row(phdA, checkUSA=False, verbose=True, returnNetwork=True)
             exampleNetworks.results[count-1] = result
             exampleNetworks.graphs[count-1] = graph
         else:
@@ -166,14 +166,18 @@ def exampleNetworks():
         years = np.array(years)
         # Make the graph repeatable
         pos = {}
-        for i, node in enumerate(graph.nodes):
-            pos[node] = (0,i)
-        nx.draw_spring(graph, pos=pos, ax=ax, node_size=100,
-                       node_color=years, alpha=0.5)
+        for i, node in enumerate(graph.nodes()):
+            pos[node] = (years[i],i**2)
+        layout = nx.spring_layout(graph, pos=pos)
+        nx.draw_networkx(graph, pos=layout, ax=ax, node_size=100,
+                         node_color=years, alpha=0.5, with_labels=False)
+        #nx.draw_spring(graph, ax=ax, node_size=100,
+        #               node_color=years, alpha=0.5, with_labels=False)
         mappableDummy = axDummy.scatter(years,years,c=years)
         cbar = plt.colorbar(mappableDummy, ax=ax, format='%i')
         cbar.set_label('Year')
         ax.text(.1,.8, txt, fontsize=24, transform=ax.transAxes)
+        ax.set_axis_off()
         figs.append(fig)
         filenames.append('example_network_%i' %count)
         count += 1
