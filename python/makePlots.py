@@ -64,6 +64,7 @@ def linkCheck(firstA=False):
     year_maxes = np.arange(1998,2012+binsize,binsize)
     fig,ax = plt.subplots()
     fig2,ax2 = plt.subplots()
+    fig3, ax3 = plt.subplots()
 
     colors = [ plt.cm.jet(x) for x in np.linspace(0, 1, year_mins.size) ]
 
@@ -95,13 +96,14 @@ def linkCheck(firstA=False):
                 yerr[1].append(max_resid)
             else:
                 yerr[1].append(0)
+        label = '%s-%s' % (str(ymin)[-2:],str(ymax)[-2:])
         if firstA:
-            ax2.plot(bins1,baseline,
-                         color=color, label='%s-%s' % (str(ymin)[-2:],str(ymax)[-2:]))
-            ax2.plot(bins1, anybaseline,'--', color=color, alpha=0.5)
+            ax2.plot(bins1,baseline, color=color, label=label)
+            #ax2.plot(bins1, anybaseline,'--', color=color, alpha=0.5)
+            ax3.plot(bins1, anybaseline-baseline, color=color, label=label)
         else:
             ax2.errorbar(bins1,baseline, yerr=yerr, ecolor=color,
-                         color=color, fmt='-o', label='%s-%s' % (str(ymin)[-2:],str(ymax)[-2:]),
+                         color=color, fmt='-o', label=label,
                          alpha=.8)
 
 
@@ -111,6 +113,11 @@ def linkCheck(firstA=False):
         ax.set_ylabel('Active Fraction - Unique Name Active Fraction')
         figs.append(fig)
         names.append('linkCheck_1stA')
+        ax3.set_ylabel('Active - Active 1st Author Fraction')
+        ax3.set_xlabel('Years Post PhD')
+        ax3.legend(numpoints=1, ncol=2)
+        figs.append(fig3)
+        names.append('staff_frac')
 
     else:
         ax.set_ylabel('Active Fraction - Unique Name Active Fraction')
