@@ -16,7 +16,7 @@
 
 
 
-\shorttitle{OMG No Jobs!}
+\shorttitle{Astronomy Publication Lifetimes}
 \shortauthors{Yoachim et al.}
 
 \begin{document}
@@ -38,8 +38,10 @@ blah blah blah, abstract
 
 \section{TO DO}
 \begin{itemize}
+\item{Need to figure out how to show that recent PhD drop in 1st author papers is real. Need to re-pull and for each author, save a list of 'years post-phd with no 1st author entries'.  Then I can figure out what the curves would have looked like if I didn't have the later data where they re-appeared. I hate saving arrays in a db-column, but since they can be ints it shouldn't be too bad.}
 \item{Just write text! }
-  \item{If I want error bars on my 1st author plot, need to remake and save ``latest unlinked 1st author year''.}
+\item{If I want error bars on my 1st author plot, need to remake and save ``latest unlinked 1st author year''.}
+  \item{Should I just try to save the network so I don't have to re-query? Could just name it after bibcode...Then have code to read network and convert to a padas frame (or numpy array).}
 \end{itemize}
 
 \section{Introduction}
@@ -86,7 +88,7 @@ Every ADS entry is a node in our network. We draw an edge between nodes if they 
 
 For our affiliation matching, we consider the affiliations to match if one affiliation is contained in the other.  For example, ``University of Washington'' is considered a match to ``Department of Astronomy, University of Washington, Box 351580'' but not ``Washington University''.  We also compare the two affiliation strings with the python difflib SequenceMatcher, and consider any affiliations that have a similarity ratio greater than 0.7 as matching.  For example ``Berkeley'' and ``UC Berkeley'' have a ratio of 0.8, and would thus be considred matching.
 
-This is a rather similar codification of the common-sense process one would take to infer if it is the same author on two papers. With author's being able to identify their papers with services such as ORCID\footnote{\url{http://orcid.org/}}, it should soon be possible to build a network of papers known to be linked to a single author as a training set for machine learning algorithms.  
+This is an attempt at codifying the common-sense process one would take to infer if it is the same author on two papers. With author's being able to identify their papers with services such as ORCID\footnote{\url{http://orcid.org/}}, it should soon be possible to build a network of papers known to be linked to a single author as a training set for machine learning algorithms.  
 
 As the final step, we select only the entries which are linked to the PhD thesis of interest.  Some example ADS entry network graphs are shown in Figure~\ref{fig:example_networks}.
 
