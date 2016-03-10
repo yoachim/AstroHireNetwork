@@ -20,6 +20,12 @@ def checkUSAff(affil):
                                           delimiter='$$', comments='#')
         checkUSAff.usinst = [aff.strip().lower() for aff in checkUSAff.usinst]
 
+    if affil is None:
+        return False
+    try:
+        ack = affil.lower()
+    except:
+        return False
     if affil.lower() in checkUSAff.usinst:
         return True
     for inst in checkUSAff.usinst:
@@ -302,18 +308,19 @@ def grabPhdClass(year):
     """
     Return a list of all the phd thesis from a given year
     """
-    ack = list(ads.query('bibstem:*PhDT', year=year, database='astronomy', rows=5000))
+    ack = list(ads.SearchQuery(q='bibstem:*PhDT year:%i' % year, database='astronomy', rows=5000))
     return ack
 
 def authorsPapers(author, years=None):
     # Getting a problem with large querie I think
     result = []
     fl = ['aff', 'pub', 'abstract', 'author', 'first_author',
-          'bibcode', 'keyword', 'year', 'title', 'reference']
+          'bibcode', 'keyword', 'year', 'title']
     try:
         if years is not None:
             result.extend(list(ads.SearchQuery(q='year:%s'%years, author=author,
-                                               database='astronomy', rows=3000, fl=fl)))
+                                               database='astronomy', rows=3000,
+                                               fl=fl)))
         else:
             result.extend(list(ads.SearchQuery(author=author, database='astronomy', rows=3000, fl=fl)))
     except:
