@@ -71,7 +71,7 @@ if __name__ == '__main__':
             ack = list(ads.SearchQuery(q='bibstem:"*PhDT" author:"%s"' % authSimple(phd.author[0].encode('utf-8')),
                                        database='astronomy'))
             if len(ack) > 1:
-                titles = set([paper.title[0].lower() for paper in ack if hasattr(paper, 'title')])
+                titles = set([paper.title[0].lower() for paper in ack if paper.title is not None])
                 if len(titles) > 1:
                     flags['uniqueName'] = False
                 else:

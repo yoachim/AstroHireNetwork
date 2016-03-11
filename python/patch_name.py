@@ -10,7 +10,7 @@ import ads
 outDir = 'output/%s' % 2007
 fileList = glob.glob(os.path.join(outDir, '*.npz'))
 
-for i,filename in enumerate(fileList[354:]):
+for i,filename in enumerate(fileList):
     print i
     temp = np.load(filename)
     result = temp['result'][()].copy()
