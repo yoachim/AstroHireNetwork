@@ -11,7 +11,8 @@ def article2dict(article):
     Convert an article object to a simple dict
     """
     keys2copy = ['aff', 'pub', 'abstract', 'author', 'first_author',
-                 'bibcode', 'keyword', 'year', 'title']
+                 'bibcode', 'keyword', 'year', 'title', 'orcid_pub',
+                 'orcid_user','orcid_other']
     result = {}
     for key in keys2copy:
         result[key] = getattr(article,key)

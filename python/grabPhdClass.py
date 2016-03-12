@@ -315,7 +315,8 @@ def authorsPapers(author, years=None):
     # Getting a problem with large querie I think
     result = []
     fl = ['aff', 'pub', 'abstract', 'author', 'first_author',
-          'bibcode', 'keyword', 'year', 'title']
+          'bibcode', 'keyword', 'year', 'title', 'orcid_pub',
+          'orcid_user','orcid_other']
     try:
         if years is not None:
             result.extend(list(ads.SearchQuery(q='year:%s'%years, author=author,
