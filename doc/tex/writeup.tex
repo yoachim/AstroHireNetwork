@@ -71,6 +71,8 @@ Our procedure for building a database of Astronomy and Astrophysics PhDs is as f
 
 For each US PhD, we then query ADS for all entries with the PhD author's last name and first initial with a date limit of 7 years pre-PhD to the present (Jan 2016).
 
+XXX--So, we looked up XXX phd's, XXX were determined to be from the US. Resulting in XXX Gb of (compressed) space.  
+
 For common names (e.g.,  Williams, B), our author query returns entries from multiple authors.  To try and restrict the results to only those papers with the same author as the PhD thesis, we construct a network graph of the ADS entries using \citet{networkx}.
 
 There can be variations in how author names are spelled, including capitalization variations (e.g., VanderPlas and Vanderplas) as well as variation in accent characters.  To ensure we match authors correctly, we reduce all author names to the format ``first initial, last name'', and consider names to match if they have a Levenshtein distance less than three.
