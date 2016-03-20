@@ -45,6 +45,12 @@ class phd_db(object):
         return [fig], ['phdsperyear']
 
 
+    def plot_retention_curve(self):
+        fig,ax = plt.subplots()
+        # need to convert "array-of-lists" to 2D array.
+        linked_hist = np.array(self.astro_df['linked_hist'].values.tolist())
+
+
 
 if __name__ == '__main__':
 
