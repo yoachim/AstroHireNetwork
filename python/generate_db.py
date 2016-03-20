@@ -19,7 +19,8 @@ def load_papers(filename):
 if __name__ == '__main__':
 
     # Set the years we want to restore and analyze
-    years = range(1997,2014)
+    #years = range(1997,2014)
+    years = range(1999, 2014)
     # Create a dict of lists so that it's easy to convert to pandas later
 
     keys = {'phd_year', 'nonUS', 'astroPublication', 'phd_bibcode', 'author',

@@ -59,6 +59,8 @@ def authSimple(author):
     reduce a name string to Last, FI
     """
     result = ''
+    if author is None:
+        return result
     if ',' in author:
         temp = author.replace(',,',',').split(',')
         temp0 = temp[0]
@@ -156,7 +158,7 @@ def checkAuthorMatch(article1,article2,authorName=None,
             return True
 
     # If published within yearGap from same location
-    if (article1['year'] is not None) & (article2['year'] is not None):
+    if (article1['year'] is not None) & (article2['year'] is not None) & (article1['author'] is not None) & (article2['author'] is not None):
         if np.abs(int(article1['year'])-int(article2['year'])) <= yearGap:
             aff1 = None
             aff2 = None
@@ -186,14 +188,16 @@ def checkAuthorMatch(article1,article2,authorName=None,
 
     # If the keywords are in common
     if (article1['keyword'] is not None) & (article2['keyword'] is not None):
-        if len(set(article1['keyword']) & set(article2['keyword'])) > keywordMatchTol:
-            # If the author is spelled exactly the same, and there are matching keywords
-            a1 = [author for author in article1['author'] if authSimple(author) == authSimple(authorName)]
-            a2 = [author for author in article2['author'] if authSimple(author) == authSimple(authorName)]
-            if (len(a1) == 1) & (len(a2) ==1):
-                # If the names match exactly
-                if a1[0] == a2[0]:
-                    return True
+        if (len(set(article1['keyword']) & set(article2['keyword']))) > keywordMatchTol:
+            if article1['author'] is not None:
+                if article2['author'] is not None:
+                    # If the author is spelled exactly the same, and there are matching keywords
+                    a1 = [author for author in article1['author'] if authSimple(author) == authSimple(authorName)]
+                    a2 = [author for author in article2['author'] if authSimple(author) == authSimple(authorName)]
+                    if (len(a1) == 1) & (len(a2) ==1):
+                        # If the names match exactly
+                        if a1[0] == a2[0]:
+                            return True
 
     return result
 
@@ -216,7 +220,10 @@ def paper_network(articleList, anchorArticle, anchorAuthor,
 
 
     for article in articleList:
-        article['authorset'] = set([authSimple(author) for author in article['author']])
+        if article['author'] is not None:
+            article['authorset'] = set([authSimple(author) for author in article['author'] if author is not None])
+        else:
+            article['authorset'] = set([])
 
     # Create graph
     paperGraph = nx.Graph()
@@ -252,8 +259,9 @@ def paper_network(articleList, anchorArticle, anchorAuthor,
             elif titleArray[i][j] > titleMatchLimit:
                 match = True
             if not match:
-                match = checkAuthorMatch(articleList[i], articleList[j],
-                                         authorName=anchorAuthor)
+                if (articleList[i] is not None) & (articleList[j] is not None):
+                    match = checkAuthorMatch(articleList[i], articleList[j],
+                                             authorName=anchorAuthor)
             if match:
                 paperGraph.add_edge(articleList[i]['bibcode'],
                                     articleList[j]['bibcode'])
