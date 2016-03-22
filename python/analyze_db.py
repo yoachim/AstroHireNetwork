@@ -57,29 +57,52 @@ class phd_db(object):
         truncate_year = 2015
 
         fig,ax = plt.subplots()
-        # need to convert "array-of-lists" to 2D array.
-        year_min = 2012
-        year_max = 2013
-        condition = (self.astro_df.phd_year >= year_min) & (self.astro_df.phd_year <= year_max)
-        linked_hist = np.array(self.astro_df[condition]['linked_hist'].values.tolist())
-        years = self.astro_df[condition]['phd_year'].values
-        nPhD = linked_hist.shape[0]
 
-        still_active = np.add.accumulate(linked_hist[:,::-1], axis=1)[:,::-1]
-        still_active[np.where(still_active > 0)] = 1
+        year_mins = np.arange(1997,2011+2,2)
+        year_maxes = np.arange(1998,2012+2,2)
+        colors = [ plt.cm.jet(x) for x in np.linspace(0, 1, year_mins.size) ]
 
-        hist_norm = still_active*0.
-        for year in np.unique(years):
-            oneYear = np.where(years == year)[0]
-            hist_norm[oneYear,:] += 1
-            yb = bins+year
-            left_limit = np.where(yb > truncate_year)[0].min()
-            hist_norm[oneYear,left_limit:] = 0
+        for year_min, year_max, color in zip(year_mins, year_maxes, colors):
+            label = str(year_min)[-2:]+'-'+str(year_max)[-2:]
+            condition = (self.astro_df.phd_year >= year_min) & (self.astro_df.phd_year <= year_max)
+            # need to convert "array-of-lists" to 2D array.
+            linked_hist = np.array(self.astro_df[condition]['linked_hist'].values.tolist())
+            years = self.astro_df[condition]['phd_year'].values
+            nPhD = linked_hist.shape[0]
 
-        hist_norm = np.sum(hist_norm,axis=0)
-        still_active = np.sum(still_active, axis=0)/hist_norm
+            # Curve that accounts for sometimes it appears an author has
+            # left the field, but they actually will publish again later
+            nz = np.where(linked_hist != 0)
+            raw_active = linked_hist*0
+            raw_active[nz] += 1
+            # Curve where we know the future
+            still_active = np.add.accumulate(linked_hist[:,::-1], axis=1)[:,::-1]
+            still_active[np.where(still_active > 0)] = 1
 
-        import pdb ; pdb.set_trace()
+            # Calculate total number of potential authors in a given year bin.
+            hist_norm = still_active*0.
+            for year in np.unique(years):
+                oneYear = np.where(years == year)[0]
+                hist_norm[oneYear,:] += 1
+                yb = bins+year
+                left_limit = np.where(yb > truncate_year)[0].min()
+                hist_norm[oneYear,left_limit+1:] = 0
+
+            hist_norm = np.sum(hist_norm,axis=0)
+            still_active = np.sum(still_active, axis=0)/hist_norm
+            raw_active = np.sum(raw_active, axis=0)/hist_norm
+            # XXX--need to make error bars go in 2 directions. Use the
+            # Unique names as another test.
+            yerr = still_active-raw_active
+            ax.errorbar(bins, still_active, yerr=yerr, color=color, fmt='-o',
+                        ecolor=color, label=label)
+
+        ax.set_xlim([0,20])
+        ax.set_ylim([0.2,1])
+        ax.legend(numpoints=1, ncol=2)
+        ax.set_xlabel('Years post PhD')
+        ax.set_ylabel('Fraction Still Active on ADS')
+        return [fig], ['retention_curve']
 
 
 if __name__ == '__main__':
@@ -88,16 +111,18 @@ if __name__ == '__main__':
     ack = phd_db()
     ack.print_stats()
 
-    ack.plot_retention_curve()
-
     plot_funcs = []
     kwargs = []
 
-    plot_funcs.append(ack.plot_phds_per_year)
+    #plot_funcs.append(ack.plot_phds_per_year)
+    #kwargs.append({})
+
+    #plot_funcs.append(plot_example_networks)
+    #kwargs.append({})
+
+    plot_funcs.append(ack. plot_retention_curve)
     kwargs.append({})
 
-    plot_funcs.append(plot_example_networks)
-    kwargs.append({})
 
     # Wow, I am getting a much better looking histogram of
     # number of astro phds per year than before.  Need to spot check
