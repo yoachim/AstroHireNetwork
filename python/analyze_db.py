@@ -67,7 +67,11 @@ class phd_db(object):
             hist_norm[oneYear,:] += 1
             yb = bins+year
             left_limit = np.where(yb > truncate_year)[0].min()
-            hist_norm[oneYear,left_limit+1:] = 0
+            hist_norm[oneYear,left_limit:] = 0
+
+            #still_active[oneYear,left_limit:] = 0
+            #raw_active[oneYear,left_limit:] = 0
+
 
         hist_norm = np.sum(hist_norm,axis=0)
         still_active = np.sum(still_active, axis=0)/hist_norm
@@ -86,8 +90,12 @@ class phd_db(object):
 
         fig,ax = plt.subplots()
 
-        year_mins = np.arange(1999,2011+2,2)
-        year_maxes = np.arange(2000,2012+2,2)
+        fig_fa, ax_fa = plt.subplots()
+
+        #year_mins = np.arange(1999,2011+2,2)
+        #year_maxes = np.arange(2000,2012+2,2)
+        year_mins = np.arange(2006,2014,1)
+        year_maxes = np.arange(2006,2014,1)
         colors = [ plt.cm.jet(x) for x in np.linspace(0, 1, year_mins.size) ]
 
 
@@ -95,15 +103,27 @@ class phd_db(object):
 
         for year_min, year_max, color in zip(year_mins, year_maxes, colors):
             label = str(year_min)[-2:]+'-'+str(year_max)[-2:]
+            # in the year range
             condition = (self.astro_df.phd_year >= year_min) & (self.astro_df.phd_year <= year_max)
+            # In the year range, and a unique name
             condition_un = (self.astro_df.phd_year >= year_min) & (self.astro_df.phd_year <= year_max) & (self.astro_df.uniqueName)
             # need to convert "array-of-lists" to 2D array.
+            # Any entries, and any entries for the unique name subset
             linked_hist = np.array(self.astro_df[condition]['linked_hist'].values.tolist())
             linked_hist_un = np.array(self.astro_df[condition_un]['linked_hist'].values.tolist())
+
+            #
+            fa_hist = np.array(self.astro_df[condition]['fa_hist'].values.tolist())
+            fa_hist_un = np.array(self.astro_df[condition_un]['fa_hist'].values.tolist())
+            linked_fa_hist = np.array(self.astro_df[condition]['fa_linked_hist'].values.tolist())
+            linked_fa_hist_un = np.array(self.astro_df[condition_un]['fa_linked_hist'].values.tolist())
+
             years = self.astro_df[condition]['phd_year'].values
 
+            # Convert to curves
             still_active, raw_active = self._hist2curve(linked_hist, years, bins)
 
+            still_active_fa, raw_active_fa = self._hist2curve(linked_fa_hist, years, bins)
 
             # XXX--need to make error bars go in 2 directions. Use the
             # Unique names as another test.
@@ -111,12 +131,25 @@ class phd_db(object):
             ax.errorbar(bins, still_active, yerr=yerr, color=color, fmt='-o',
                         ecolor=color, label=label)
 
+            ax_fa.plot(bins, still_active_fa, '-o', color=color,
+                       label=label)
+
+
         ax.set_xlim([0,20])
         ax.set_ylim([0.2,1])
         ax.legend(numpoints=1, ncol=2)
         ax.set_xlabel('Years post PhD')
         ax.set_ylabel('Fraction Still Active on ADS')
-        return [fig], ['retention_curve']
+
+
+        ax_fa.set_xlim([0,20])
+        ax_fa.set_ylim([0,1])
+        ax_fa.legend(numpoints=1, ncol=2)
+        ax_fa.set_xlabel('Years post PhD')
+        ax_fa.set_ylabel('Fraction Still 1st Authors')
+
+
+        return [fig, fig_fa], ['retention_curve', 'retention_curve_fa']
 
 
 if __name__ == '__main__':

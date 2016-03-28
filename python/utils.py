@@ -22,8 +22,8 @@ def inAstroJ(toTest):
                                 'Monthly Notices of the Royal Astronomical Society','MNRAS',
                                 'Publications of the Astronomical Society of the Pacific', 'PASP',
                                  #'Icarus',
-                                'American Astronomical Society', 'AAS',
-                                'International Astronomical Union', 'IAU'
+                                #'American Astronomical Society', #'AAS',
+                                #'International Astronomical Union'#, 'IAU'
     ]
         inAstroJ.journalList = [j.lower() for j in inAstroJ.journalList]
 
