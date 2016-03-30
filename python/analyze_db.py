@@ -30,6 +30,7 @@ class phd_db(object):
         """
         print 'Total number of PhDs found = %i' % len(self.data_df.index)
         print 'Total USA Astro PhDs found = %i' % len(self.astro_df.index)
+        print 'Total USA Astro PhDs w/ unique names = %i' % len(self.astro_df[self.astro_df.uniqueName == True])
 
     def plot_phds_per_year(self):
         """
@@ -72,11 +73,30 @@ class phd_db(object):
             #still_active[oneYear,left_limit:] = 0
             #raw_active[oneYear,left_limit:] = 0
 
+        still_active = np.sum(still_active, axis=0)
+        raw_active = np.sum(raw_active, axis=0)
+        hist_norm = np.sum(hist_norm,axis=0) * np.max(still_active)
 
-        hist_norm = np.sum(hist_norm,axis=0)
-        still_active = np.sum(still_active, axis=0)/hist_norm
-        raw_active = np.sum(raw_active, axis=0)/hist_norm
+        return still_active, raw_active, hist_norm
 
+    def _h2cm(self, linked_hist, years, bins, truncate_year=2015):
+        """
+        Run the above for each year and combine
+        """
+        still_active = 0
+        raw_active = 0
+        hist_norm = 0
+        for year in np.unique(years):
+            oneYear = np.where(years == year)[0]
+            sa, ra, hn = self._hist2curve(linked_hist[oneYear,:], [year], bins, truncate_year=truncate_year)
+            mask = np.where(hn == 0)
+            sa[mask] = 0
+            ra[mask] = 0
+            still_active += sa
+            raw_active += ra
+            hist_norm += hn
+        still_active = still_active/hist_norm
+        raw_active = raw_active/hist_norm
         return still_active, raw_active
 
     def plot_retention_curve(self, first_author=False):
@@ -92,16 +112,18 @@ class phd_db(object):
 
         fig_fa, ax_fa = plt.subplots()
 
-        #year_mins = np.arange(1999,2011+2,2)
-        #year_maxes = np.arange(2000,2012+2,2)
-        year_mins = np.arange(2006,2014,1)
-        year_maxes = np.arange(2006,2014,1)
+        year_mins = np.arange(1998,2012+2,2)
+        year_maxes = np.arange(1999,2013+2,2)
+        #year_mins = np.arange(2006,2014,1)
+        #year_maxes = np.arange(2006,2014,1)
         colors = [ plt.cm.jet(x) for x in np.linspace(0, 1, year_mins.size) ]
 
 
         # Can use all_hist as well, fa_hist, fa_linked_hist
 
         for year_min, year_max, color in zip(year_mins, year_maxes, colors):
+            curveDict_active = {}
+            curveDict_raw = {}
             label = str(year_min)[-2:]+'-'+str(year_max)[-2:]
             # in the year range
             condition = (self.astro_df.phd_year >= year_min) & (self.astro_df.phd_year <= year_max)
@@ -121,9 +143,11 @@ class phd_db(object):
             years = self.astro_df[condition]['phd_year'].values
 
             # Convert to curves
-            still_active, raw_active = self._hist2curve(linked_hist, years, bins)
+            still_active, raw_active = self._h2cm(linked_hist, years, bins)
+            still_active_fa, raw_active_fa = self._h2cm(linked_fa_hist, years, bins)
+            # XXX--maybe dump these into a dictionary for easier sorting and generating error bars?
 
-            still_active_fa, raw_active_fa = self._hist2curve(linked_fa_hist, years, bins)
+
 
             # XXX--need to make error bars go in 2 directions. Use the
             # Unique names as another test.
