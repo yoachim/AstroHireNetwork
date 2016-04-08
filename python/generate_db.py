@@ -19,13 +19,13 @@ def load_papers(filename):
 if __name__ == '__main__':
 
     # Set the years we want to restore and analyze
-    #years = range(1997,2014)
+    # years = range(1997,2014)
     years = range(1999, 2014)
     # Create a dict of lists so that it's easy to convert to pandas later
 
     keys = {'phd_year', 'nonUS', 'astroPublication', 'phd_bibcode', 'author',
             'last_year', 'last_1st_year',
-            'uniqueName','fa_hist', 'fa_linked_hist',
+            'uniqueName', 'fa_hist', 'fa_linked_hist',
             'linked_hist', 'all_hist'}
     hist_keys = []
     all_results = {}
@@ -37,9 +37,9 @@ if __name__ == '__main__':
     year_bins = np.arange(28)-years_pre_phd-0.5
     for year in years:
         print 'year = %i' % year
-        filenames = glob.glob(os.path.join('output',str(year),'*PhDT*.npz'))
+        filenames = glob.glob(os.path.join('output', str(year), '*PhDT*.npz'))
         maxI = len(filenames)
-        for i,filename in enumerate(filenames):
+        for i, filename in enumerate(filenames):
 
             # Progress Bar
             progress = i/float(maxI)*100
@@ -47,7 +47,7 @@ if __name__ == '__main__':
             sys.stdout.write(text)
             sys.stdout.flush()
 
-            phd_bibcode = os.path.basename(filename).replace('.npz','').replace('_','.')
+            phd_bibcode = os.path.basename(filename).replace('.npz', '').replace('_', '.')
             all_results['phd_bibcode'].append(phd_bibcode)
             papers, flags = load_papers(filename)
             phd = [paper for paper in papers if phd_bibcode in paper['bibcode']][0]
@@ -57,10 +57,10 @@ if __name__ == '__main__':
             flags['astroPublication'] = None
             last_year = None
             last_1st_year = None
-            fa_hist = np.array([], dtype=int) #year_bins[1:]*0
-            all_hist = np.array([], dtype=int) #year_bins[1:]*0
-            fa_linked_hist = np.array([], dtype=int) #year_bins[1:]*0
-            linked_hist = np.array([], dtype=int) #year_bins[1:]*0
+            fa_hist = np.array([], dtype=int)  # year_bins[1:]*0
+            all_hist = np.array([], dtype=int)  # year_bins[1:]*0
+            fa_linked_hist = np.array([], dtype=int)  # year_bins[1:]*0
+            linked_hist = np.array([], dtype=int)  # year_bins[1:]*0
             unique_name = None
             flagKeys = ['astroPublication', 'nonUS', 'uniqueName']
             for key in flagKeys:
@@ -73,12 +73,12 @@ if __name__ == '__main__':
                     flags['astroPublication'] = False
                 else:
                     connected_papers, network = paper_network(papers, phd, authSimple(phd['author'][0]))
-                    first_author_linked_papers =[paper for paper in connected_papers if
-                                                    authSimple(phd['author'][0]) ==
-                                                    authSimple(paper['first_author'] )]
+                    first_author_linked_papers = [paper for paper in connected_papers if
+                                                  authSimple(phd['author'][0]) ==
+                                                  authSimple(paper['first_author'])]
                     first_author_papers = [paper for paper in papers if
                                            authSimple(phd['author'][0]) ==
-                                           authSimple(paper['first_author'] )]
+                                           authSimple(paper['first_author'])]
 
                     fap_years = [int(paper['year']) for paper in first_author_papers]
                     linked_years = [int(paper['year']) for paper in connected_papers]
@@ -113,7 +113,7 @@ if __name__ == '__main__':
         # Convert the results to a dataframe and save it
         author_df = pd.DataFrame(all_results, columns=all_results.keys())
         author_df.to_hdf('phd_store_%i.h5' % year, 'author_df')
-        #store.append('author_df', author_df)
+        # store.append('author_df', author_df)
         # Clear out some memory:
         for key in keys:
             all_results[key] = []

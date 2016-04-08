@@ -88,7 +88,7 @@ class phd_db(object):
         hist_norm = 0
         for year in np.unique(years):
             oneYear = np.where(years == year)[0]
-            sa, ra, hn = self._hist2curve(linked_hist[oneYear,:], [year], bins, truncate_year=truncate_year)
+            sa, ra, hn = self._hist2curve(linked_hist[oneYear, :], [year], bins, truncate_year=truncate_year)
             mask = np.where(hn == 0)
             sa[mask] = 0
             ra[mask] = 0
@@ -108,15 +108,18 @@ class phd_db(object):
         year_bins = np.arange(28)-years_pre_phd-0.5
         bins = year_bins[:-1]+.5
 
-        fig,ax = plt.subplots()
-
+        fig, ax = plt.subplots()
+        fig2, ax2 = plt.subplots()
+        fig3, ax3 = plt.subplots()
         fig_fa, ax_fa = plt.subplots()
 
-        year_mins = np.arange(1998,2012+2,2)
-        year_maxes = np.arange(1999,2013+2,2)
+        fig_raw1, ax_raw1 = plt.subplots()
+
+        year_mins = np.arange(1998, 2012+2, 2)
+        year_maxes = np.arange(1999, 2013+2, 2)
         #year_mins = np.arange(2006,2014,1)
         #year_maxes = np.arange(2006,2014,1)
-        colors = [ plt.cm.jet(x) for x in np.linspace(0, 1, year_mins.size) ]
+        colors = [plt.cm.jet(x) for x in np.linspace(0, 1, year_mins.size)]
 
 
         # Can use all_hist as well, fa_hist, fa_linked_hist
@@ -141,39 +144,66 @@ class phd_db(object):
             linked_fa_hist_un = np.array(self.astro_df[condition_un]['fa_linked_hist'].values.tolist())
 
             years = self.astro_df[condition]['phd_year'].values
+            years_un = self.astro_df[condition_un]['phd_year'].values
 
-            # Convert to curves
+            # Convert to curves. The raw_active curves show what it would look like with no
+            # knowledge of future publications
             still_active, raw_active = self._h2cm(linked_hist, years, bins)
+            still_active_unique, raw_active_unique = self._h2cm(linked_hist_un, years_un, bins)
+
             still_active_fa, raw_active_fa = self._h2cm(linked_fa_hist, years, bins)
+            sa_fa_u, raw_sa_fa_u = self._h2cm(linked_fa_hist_un, years_un, bins)
+            # OK, now I want the plain fa_hist ones, to check for under-linking.
+            
             # XXX--maybe dump these into a dictionary for easier sorting and generating error bars?
-
-
 
             # XXX--need to make error bars go in 2 directions. Use the
             # Unique names as another test.
             yerr = still_active-raw_active
-            ax.errorbar(bins, still_active, yerr=yerr, color=color, fmt='-o',
-                        ecolor=color, label=label)
+            #ax.errorbar(bins, still_active, yerr=yerr, color=color, fmt='-o',
+            #            ecolor=color, label=label)
+            ax.plot(bins, still_active, '-o', color=color, label=label)
+            ax2.plot(bins, still_active_unique, '-o', color=color, label=label)
 
             ax_fa.plot(bins, still_active_fa, '-o', color=color,
                        label=label)
+            ax3.plot(bins, sa_fa_u, '-o', color=color,
+                       label=label)
+            ax_raw1.plot(bins, raw_sa_fa_u, '-o', color=color,
+                       label=label)
 
-
-        ax.set_xlim([0,20])
-        ax.set_ylim([0.2,1])
+        ax.set_xlim([0, 20])
+        ax.set_ylim([0.2, 1])
         ax.legend(numpoints=1, ncol=2)
         ax.set_xlabel('Years post PhD')
         ax.set_ylabel('Fraction Still Active on ADS')
 
+        ax2.set_xlim([0, 20])
+        ax2.set_ylim([0.2, 1])
+        ax2.legend(numpoints=1, ncol=2)
+        ax2.set_xlabel('Years post PhD')
+        ax2.set_ylabel('Fraction Still Active on ADS (unique names)')
 
-        ax_fa.set_xlim([0,20])
-        ax_fa.set_ylim([0,1])
+        ax_fa.set_xlim([0, 20])
+        ax_fa.set_ylim([0, 1])
         ax_fa.legend(numpoints=1, ncol=2)
         ax_fa.set_xlabel('Years post PhD')
         ax_fa.set_ylabel('Fraction Still 1st Authors')
 
+        ax3.set_xlim([0, 20])
+        ax3.set_ylim([0, 1])
+        ax3.legend(numpoints=1, ncol=2)
+        ax3.set_xlabel('Years post PhD')
+        ax3.set_ylabel('Fraction Still 1st Authors (unique names)')
 
-        return [fig, fig_fa], ['retention_curve', 'retention_curve_fa']
+        ax_raw1.set_xlim([0, 20])
+        ax_raw1.set_ylim([0, 1])
+        ax_raw1.legend(numpoints=1, ncol=2)
+        ax_raw1.set_xlabel('Years post PhD')
+        ax_raw1.set_ylabel('Fraction Still 1st Authors')
+        ax_raw1.set_title('Real Time')
+
+        return [fig, fig_fa, fig2, fig3, fig_raw1], ['rc', 'rc_fa', 'rc_unique', 'rc_fa_unique', 'rc_fa_raw']
 
 
 if __name__ == '__main__':
