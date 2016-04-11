@@ -115,6 +115,9 @@ class phd_db(object):
 
         fig_raw1, ax_raw1 = plt.subplots()
 
+        # ok, a final figure with error bars
+        fig_eb, ax_eb = plt.subplots()
+
         year_mins = np.arange(1998, 2012+2, 2)
         year_maxes = np.arange(1999, 2013+2, 2)
         #year_mins = np.arange(2006,2014,1)
@@ -153,8 +156,9 @@ class phd_db(object):
 
             still_active_fa, raw_active_fa = self._h2cm(linked_fa_hist, years, bins)
             sa_fa_u, raw_sa_fa_u = self._h2cm(linked_fa_hist_un, years_un, bins)
+            sa_fa_u_un, blah = self._h2cm(fa_hist_un, years_un, bins)
             # OK, now I want the plain fa_hist ones, to check for under-linking.
-            
+
             # XXX--maybe dump these into a dictionary for easier sorting and generating error bars?
 
             # XXX--need to make error bars go in 2 directions. Use the
@@ -171,6 +175,14 @@ class phd_db(object):
                        label=label)
             ax_raw1.plot(bins, raw_sa_fa_u, '-o', color=color,
                        label=label)
+
+            # Should be linked 1st author, linked 1st author with unique names, and 1st author unique name (not linked)
+            rel_curves = np.array([still_active_fa, sa_fa_u, sa_fa_u_un])
+            lower_bars = np.abs(np.min(rel_curves, axis=0) - still_active_fa)
+            upper_bars = np.abs(np.max(rel_curves, axis=0) - still_active_fa)
+            ax_eb.errorbar(bins, still_active_fa, fmt='-o', yerr=[lower_bars, upper_bars],
+                           ecolor=color,  color=color, label=label)
+
 
         ax.set_xlim([0, 20])
         ax.set_ylim([0.2, 1])
@@ -203,7 +215,16 @@ class phd_db(object):
         ax_raw1.set_ylabel('Fraction Still 1st Authors')
         ax_raw1.set_title('Real Time')
 
-        return [fig, fig_fa, fig2, fig3, fig_raw1], ['rc', 'rc_fa', 'rc_unique', 'rc_fa_unique', 'rc_fa_raw']
+        ax_eb.set_xlim([0, 20])
+        ax_eb.set_ylim([0.2, 1])
+        ax_eb.legend(numpoints=1, ncol=2)
+        ax_eb.set_xlabel('Years post PhD')
+        ax_eb.set_ylabel('Fraction Still 1st Authors')
+        ax_eb.set_title('')
+
+        return [fig, fig_fa, fig2,
+                fig3, fig_raw1, fig_eb], ['rc', 'rc_fa', 'rc_unique',
+                                          'rc_fa_unique', 'rc_fa_raw', 'rc_eb']
 
 
 if __name__ == '__main__':
