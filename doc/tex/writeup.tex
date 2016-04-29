@@ -38,10 +38,7 @@ blah blah blah, abstract
 
 \section{TO DO}
 \begin{itemize}
-\item{Need to figure out how to show that recent PhD drop in 1st author papers is real. Need to re-pull and for each author, save a list of 'years post-phd with no 1st author entries'.  Then I can figure out what the curves would have looked like if I didn't have the later data where they re-appeared. I hate saving arrays in a db-column, but since they can be ints it shouldn't be too bad.}
 \item{Just write text! }
-\item{If I want error bars on my 1st author plot, need to remake and save ``latest unlinked 1st author year''.}
-  \item{Should I just try to save the network so I don't have to re-query? Could just name it after bibcode...Then have code to read network and convert to a padas frame (or numpy array).}
 \end{itemize}
 
 \section{Introduction}
@@ -114,15 +111,12 @@ The ADS publication must match at least one of:
 Astronomy and Astrophysics & A\&A \\
 Astrophysical Journal & AJ \\
 Astronomical Journal & ApJ \\
-Monthly Notices of the Royal Astronomical Society & MNRAS \\
-Icarus \\
-American Astronomical Society & AAS \\
-International Astronomical Union & IAU
+Monthly Notices of the Royal Astronomical Society & MNRAS 
 \enddata
 \end{deluxetable}
 
 
-Thus, our definition of a US PhD astronomer is effectively a person who received a PhD from an institution in the United States and has published at least one paper in an astronomy journal.
+Thus, our definition of a US PhD astronomer is effectively a person who received a PhD from an institution in the United States and has published at least one paper in a major peer-reviewed English-language astronomy journal.
 
 We record the thesis author's most recent ADS entry date (need not be a peer-reviewed paper)  and a bunch of other stuff.
 
@@ -132,13 +126,13 @@ One known issue is that ADS does not contain all Astronomy PhD dissertations. We
 
 
 \begin{figure*}
-  \plottwo{../../plots/single_example_network_1.pdf}{../../plots/single_example_network_2.pdf}\\
-    \plottwo{../../plots/single_example_network_3.pdf}{../../plots/single_example_network_4.pdf}
+  \plottwo{../../new_plots/single_example_network_0.pdf}{../../new_plots/single_example_network_1.pdf}\\
+    \plottwo{../../new_plots/single_example_network_2.pdf}{../../new_plots/single_example_network_3.pdf}
         \caption{Examples of network graphs constructed to find papers linked to individual PhD thesis entries in ADS.   (a) Network of ADS entries with the same author as \citet{Yoachim07} (46 entries, 44 linked to the PhD), (b) Network for \citet{Bellm2011} (106 entries, 99 linked),(c) Network for \citet{Williams02}, (315 papers, 270 linked) (d) Network for \citet{Williams11} (158 papers, 113 linked).  Note, none of the linked papers for the two Williams, B PhDs overlap. \label{fig:example_networks}}
 \end{figure*}
 
 \begin{figure}
-  \plotone{../../plots/single_example_network_5.pdf}
+  \plotone{../../new_plots/single_example_network_4.pdf}
   \caption{Example of an ADS networks that suffers from under-linking.  (e) The under-linked network of \citet{Capelo12}.  A single ADS entry in the future could link a network back together.}
 \end{figure}
 
@@ -163,10 +157,10 @@ Thus there are two types of errors that can skew our results, over-linking our n
 
 Using the less-common name subset, we can also test for under-linking by assuming the names are unique and all the ADS entries returned for a name search should be linked.  The results of the unique name tests are shown in Figure~\ref{fig:unames}. We find little evidence of under-linking. Comparing the less-common name results changes the retention rate by only $\sim4$\%. When we test for under-linking, we find recent PhDs could be suffering from under-linking at the 5-8\% level, while older PhDs suffer under-linking at lower rates (2-4\%).  This should be slightly expected, as younger astronomers typically change institutions, and many will have not yet published papers that link back to their previously established cloud.  The important aspect is that the relative over- and under-linking between PhD cohorts is similar.  Thus, the recent dramatic (20\%) drop we observe in astronomer retention is real and not an artifact of how we assign ADS entries to authors.
 
-\begin{figure*}
-  \plotone{../../plots/span_linkCheck.pdf}
-  \caption{Solid lines show the residuals when comparing to retention curves constructed with unique names (e.g., a sub-sample that should suffer from little to no over-linking).  The dashed lines shows the comparision to unique names when the unique name group is assumed to have a completely linked network (e.g., a subsample that suffers from little to no under-linking).  \label{fig:unames}}
-  \end{figure*}
+%\begin{figure*}
+%  \plotone{../../plots/span_linkCheck.pdf}
+%  \caption{Solid lines show the residuals when comparing to retention curves constructed with unique names (e.g., a sub-sample that should suffer from little to no over-linking).  The dashed lines shows the comparision to unique names when the unique name group is assumed to have a completely linked network (e.g., a subsample that suffers from little to no under-linking).  \label{fig:unames}}
+%  \end{figure*}
 
 
 It is worth emphasizing that while there are undoubtedly some cases where we have not accurately recorded an astronomer, we do not suffer the selection biases that go with survey-based studies and that our errors should be similar across PhD cohorts, thus we can draw strong conclusions about the relative differences between PhD classes.
@@ -177,39 +171,49 @@ To test how much we are affected by over-linking ADS entries, we compare the ret
 
 
 \begin{figure}
-  \plotone{../../plots/single_phdsperyear.pdf}
+  \plotone{../../new_plots/single_phdsperyear.pdf}
   \caption{Number of US Astronomy PhD thesis entries found in ADS per year. \label{fig:phdperyear}}
 \end{figure}
 
-\begin{figure*}
-  \plotone{../../plots/span_linkCheck_errorbars.pdf}
-  \caption{Plot of how long PhD astronomers stay active in the ADS archive.  Error bars are set by comparing to a subset of astronomers with more unique names as outlined in \S\ref{sec:db_construct}.   \label{fig:active_curves}}
-  \end{figure*}
-
 
 \begin{figure*}
-  \plotone{../../plots/span_linkCheck_errorbars_1stA.pdf}
-  \caption{Like Figure~\ref{fig:active_curves}, but now using the most recent connected paper where the author is the first author.  The dashed lines show the curves from Figure~\ref{fig:active_curves} for comparison. The downturn in the older curves (1999-2004) could be an artifact caused by astronomers who lead a paper only every few years, e.g., two years from now those curves could rise back up.  \label{fig:1stA_active}}
+  \plotone{../../new_plots/single_rc_eb.pdf}
+  \caption{The fraction of Astronomy PhDs still active as first authors.  Error bars show ranges computed by comparing the curves to those of just authors with unique names and uique names where all records are assumed to be linked.   \label{fig:retentiont_curve}}
 \end{figure*}
 
-\begin{figure}
-  \plotone{../../plots/single_staff_frac.pdf}
-  \caption{The fraction to PhDs who are still apearing in ADS entries, but no longer as first authors. \label{fig:non_1st_frac}}
-\end{figure}
+%\begin{figure*}
+%  \plotone{../../plots/span_linkCheck_errorbars.pdf}
+%  \caption{Plot of how long PhD astronomers stay active in the ADS archive.  Error bars are set by comparing to a subset of astronomers with more unique names as outlined in \S\ref{sec:db_construct}.   \label{fig:active_curves}}
+%  \end{figure*}
+
+
+%\begin{figure*}
+%  \plotone{../../plots/span_linkCheck_errorbars_1stA.pdf}
+%  \caption{Like Figure~\ref{fig:active_curves}, but now using the most recent connected paper where the author is the first author.  The dashed lines show the curves from Figure~\ref{fig:active_curves} for comparison. The downturn in the older curves (1999-2004) could be an artifact caused by astronomers who lead a paper only every few years, e.g., two years from now those curves could rise back up.  \label{fig:1stA_active}}
+%\end{figure*}
+
+%\begin{figure}
+%  \plotone{../../plots/single_staff_frac.pdf}
+%  \caption{The fraction to PhDs who are still apearing in ADS entries, but no longer as first authors. \label{fig:non_1st_frac}}
+%\end{figure}
 
 
 
-Figure~\ref{fig:1stA_active} is particularly disturbing, less than 50\% of the 2009 and 2010 cohorts are still apearing as first authors on ADS entries. Note, these are any entries, we have not limited it to peer-reviewed papers.  This implies that most post-2008 USA-PhD astronomers now spend more time in graduate school than they do leading their own research projects post-graduation. Imagine if a corporation had a training program that lasted 3 months, and most of the employees who completed it left after 3 months post-training.  This seems an odd place in the career path to place a bottleneck.
+Figure~\ref{fig:retention_curve} is particularly disturbing, less than 50\% of the 2009 to 2012 cohorts are still apearing as first authors on ADS entries. Note, these are any entries, we have not limited it to peer-reviewed papers.  This implies that most post-2008 USA-PhD astronomers now spend more time in graduate school than they do leading their own research projects post-graduation. Imagine if a corporation had a training program that lasted 3 months, and most of the employees who completed it left after 3 months post-training.  This seems an odd place in the career path to place a bottleneck.
 
-Figure~\ref{fig:non_1st_frac} shows the fraction of PhDs that are still in ADS, but not as first authors.  Each cohort shows a sharp rise in the past 2-3 years. We suspect this could be an artifact where after 8-15 years, some active astronomers have moved to mentoring roles where they do not publish as first authors every year.  Thus, if we re-ran the experiment several years from now, those sharp rises would shift to the right.
+There is a potential bias if authors pubilsh as first authors on intervals longer than a year.  If that is the case, we would expect the last few points of each cohort curve in Figure~\ref{fig:retention_curve} to be slightly depressed.  XXX--go through and compute the typical time gap between linked 1st author papers.  
 
-This seems a less likely explination for the recent PhD cohorts, and a better explination could be that they have left the field, but they are still being listed as authors on projects they contributed to months to years ago.
+Currently, 30\% of PhDs are immediatly leaving the field, double the fraction typical pre-2008.  
+
+%Figure~\ref{fig:non_1st_frac} shows the fraction of PhDs that are still in ADS, but not as first authors.  Each cohort shows a sharp rise in the past 2-3 years. We suspect this could be an artifact where after 8-15 years, some active astronomers have moved to mentoring roles where they do not publish as first authors every year.  Thus, if we re-ran the experiment several years from now, those sharp rises would shift to the right.
+
+%This seems a less likely explination for the recent PhD cohorts, and a better explination could be that they have left the field, but they are still being listed as authors on projects they contributed to months to years ago.
 
 
-\begin{figure}
-  \plotone{../../plots/single_retention_by_class.pdf}
-  \caption{The 4, 6, and 10 year retention fractions as a function of PhD cohort year.\label{fig:retention}}
-\end{figure}
+%\begin{figure}
+%  \plotone{../../plots/single_retention_by_class.pdf}
+%  \caption{The 4, 6, and 10 year retention fractions as a function of PhD cohort year.\label{fig:retention}}
+%\end{figure}
 
 Figure~\ref{fig:active_curves} shows that recent PhDs are leaving the field much faster than a edcade ago.  The values of 70-80\% retention after 4-6 years may not sound so bad.  Figure~\ref{fig:1stA_active} perhaps helps explain what is going on. While recent PhDs are still apearing in the ADS archive at the 70-80\% level, they are still apearing as the first-author only 40-50\% of the time. A possible explination is that recent PhDs are leaving the field and their former collaborators are slowly finishing projects which they contributed to.
 
@@ -217,7 +221,6 @@ Another possibility is that few PhDs have first-author ADS entries every year. T
 
 Note:  The curves looked weird if we included years before 1997. This could be because the job market was diffferent at that time, or it could be that ADS completeness changes. On their FAQ \footnote{\url{http://adsabs.harvard.edu/abs\_doc/faq.html}}, ADS notes they transitioned to getting abstracts directly from journals in the middle of 1995.
 
-Discuss the major dips in number of PhDs in 2009 and 2011.  The 2009 makes a bit of sense, as 2008 was a large year, and students might have been avoiding the bad economy.  Not sure about 2011, although that dip might be seen elswhere too?
 
 \section{Discussion}
 

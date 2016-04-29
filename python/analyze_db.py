@@ -182,6 +182,7 @@ class phd_db(object):
             upper_bars = np.abs(np.max(rel_curves, axis=0) - still_active_fa)
             ax_eb.errorbar(bins, still_active_fa, fmt='-o', yerr=[lower_bars, upper_bars],
                            ecolor=color,  color=color, label=label)
+            ax_eb.set_title('US Astronomy PhDs')
 
 
         ax.set_xlim([0, 20])
