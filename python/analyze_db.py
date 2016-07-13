@@ -237,11 +237,11 @@ if __name__ == '__main__':
     plot_funcs = []
     kwargs = []
 
-    #plot_funcs.append(ack.plot_phds_per_year)
-    #kwargs.append({})
+    plot_funcs.append(ack.plot_phds_per_year)
+    kwargs.append({})
 
-    #plot_funcs.append(plot_example_networks)
-    #kwargs.append({})
+    plot_funcs.append(plot_example_networks)
+    kwargs.append({})
 
     plot_funcs.append(ack. plot_retention_curve)
     kwargs.append({})
