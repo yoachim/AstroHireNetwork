@@ -7,6 +7,7 @@ import sys
 sys.path.append("/Users/yoachim/gitRepos/matplotlib_pubplots/python")
 import set_plot_params as spp
 from make_plots import plot_example_networks
+from scipy.interpolate import interp1d
 
 class phd_db(object):
     """
@@ -118,6 +119,9 @@ class phd_db(object):
         # ok, a final figure with error bars
         fig_eb, ax_eb = plt.subplots()
 
+        # invert and get years to 50%
+        fig_50, ax_50 = plt.subplots()
+
         year_mins = np.arange(1998, 2012+2, 2)
         year_maxes = np.arange(1999, 2013+2, 2)
         #year_mins = np.arange(2006,2014,1)
@@ -126,6 +130,7 @@ class phd_db(object):
 
 
         # Can use all_hist as well, fa_hist, fa_linked_hist
+        year50 = []
 
         for year_min, year_max, color in zip(year_mins, year_maxes, colors):
             curveDict_active = {}
@@ -182,7 +187,14 @@ class phd_db(object):
             upper_bars = np.abs(np.max(rel_curves, axis=0) - still_active_fa)
             ax_eb.errorbar(bins, still_active_fa, fmt='-o', yerr=[lower_bars, upper_bars],
                            ecolor=color,  color=color, label=label)
-            ax_eb.set_title('US Astronomy PhDs')
+            ax_eb.set_title('USA Astro in ADS')
+            good = np.where((bins >=0) & (~np.isnan(still_active)))
+            f = interp1d(still_active_fa[good], bins[good])
+            year50.append(f(0.5))
+
+        ax_50.errorbar((year_mins+year_maxes)/2., year50, xerr=0.5, fmt='ko')
+        ax_50.set_xlabel('PhD cohort year')
+        ax_50.set_ylabel('Years to 50% Retention')
 
 
         ax.set_xlim([0, 20])
@@ -190,24 +202,28 @@ class phd_db(object):
         ax.legend(numpoints=1, ncol=2)
         ax.set_xlabel('Years post PhD')
         ax.set_ylabel('Fraction Still Active on ADS')
+        ax.set_title('USA Astro in ADS')
 
         ax2.set_xlim([0, 20])
         ax2.set_ylim([0.2, 1])
         ax2.legend(numpoints=1, ncol=2)
         ax2.set_xlabel('Years post PhD')
         ax2.set_ylabel('Fraction Still Active on ADS (unique names)')
+        ax2.set_title('USA Astro in ADS')
 
         ax_fa.set_xlim([0, 20])
         ax_fa.set_ylim([0, 1])
         ax_fa.legend(numpoints=1, ncol=2)
         ax_fa.set_xlabel('Years post PhD')
         ax_fa.set_ylabel('Fraction Still 1st Authors')
+        ax_fa.set_title('USA Astro in ADS')
 
         ax3.set_xlim([0, 20])
         ax3.set_ylim([0, 1])
         ax3.legend(numpoints=1, ncol=2)
         ax3.set_xlabel('Years post PhD')
         ax3.set_ylabel('Fraction Still 1st Authors (unique names)')
+        ax3.set_title('USA Astro in ADS')
 
         ax_raw1.set_xlim([0, 20])
         ax_raw1.set_ylim([0, 1])
@@ -221,11 +237,11 @@ class phd_db(object):
         ax_eb.legend(numpoints=1, ncol=2)
         ax_eb.set_xlabel('Years post PhD')
         ax_eb.set_ylabel('Fraction Still 1st Authors')
-        ax_eb.set_title('')
+        
 
         return [fig, fig_fa, fig2,
-                fig3, fig_raw1, fig_eb], ['rc', 'rc_fa', 'rc_unique',
-                                          'rc_fa_unique', 'rc_fa_raw', 'rc_eb']
+                fig3, fig_raw1, fig_eb, fig_50], ['rc', 'rc_fa', 'rc_unique',
+                                          'rc_fa_unique', 'rc_fa_raw', 'rc_eb', 'rc_50']
 
 
 if __name__ == '__main__':
