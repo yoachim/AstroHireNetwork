@@ -70,7 +70,7 @@ Our procedure for building a database of Astronomy and Astrophysics PhDs is as f
 
 For each US PhD, we then query ADS for all entries with the PhD author's last name and first initial with a date limit of 7 years pre-PhD to the present (Jan 2016).
 
-XXX--So, we looked up XXX phd's, XXX were determined to be from the US. Resulting in XXX Gb of (compressed) space.  
+XXX--So, we found 8820 phd's from 1997 to 2013, 2903 were determined to be unique Astronomy and from the US. Resulting in 19 Mb of space.  
 
 For common names (e.g.,  Williams, B), our author query returns entries from multiple authors.  To try and restrict the results to only those papers with the same author as the PhD thesis, we construct a network graph of the ADS entries using \citet{networkx}.
 
@@ -157,7 +157,7 @@ Ways we could mistakenly claim an author has published for longer than they actu
 
 Thus there are two types of errors that can skew our results, over-linking our networks, connecting ADS entries that are not actually by the same author and under-linking, where we fail to recognize entries that are by the same author.  To look for the effects of over- and under-linking, we flag authors where the ADS database only lists one PhD thesis as matching their last name, and first initial. These represent less-common names that should suffer much lower rates of over-linking.
 
-Using the less-common name subset, we can also test for under-linking by assuming the names are unique and all the ADS entries returned for a name search should be linked.  The results of the unique name tests are shown in Figure~\ref{fig:unames}. We find little evidence of under-linking. Comparing the less-common name results changes the retention rate by only $\sim4$\%. When we test for under-linking, we find recent PhDs could be suffering from under-linking at the 5-8\% level, while older PhDs suffer under-linking at lower rates (2-4\%).  This should be slightly expected, as younger astronomers typically change institutions, and many will have not yet published papers that link back to their previously established cloud.  The important aspect is that the relative over- and under-linking between PhD cohorts is similar.  Thus, the recent dramatic (20\%) drop we observe in astronomer retention is real and not an artifact of how we assign ADS entries to authors.
+Using the less-common name subset, we can also test for under-linking by assuming the names are unique and all the ADS entries returned for a name search should be linked.  We find little evidence of under-linking. Comparing the less-common name results changes the retention rate by only $\sim4$\%. When we test for under-linking, we find recent PhDs could be suffering from under-linking at the 5-8\% level, while older PhDs suffer under-linking at lower rates (2-4\%).  This should be slightly expected, as younger astronomers typically change institutions, and many will have not yet published papers that link back to their previously established cloud.  The important aspect is that the relative over- and under-linking between PhD cohorts is similar.  Thus, the recent dramatic (20\%) drop we observe in astronomer retention is real and not an artifact of how we assign ADS entries to authors.
 
 %\begin{figure*}
 %  \plotone{../../plots/span_linkCheck.pdf}
@@ -180,12 +180,12 @@ To test how much we are affected by over-linking ADS entries, we compare the ret
 
 \begin{figure*}
   \plotone{../../new_plots/single_rc_eb.pdf}
-  \caption{The fraction of Astronomy PhDs still active as first authors.  Error bars show ranges computed by comparing the curves to those of just authors with unique names and uique names where all records are assumed to be linked.   \label{fig:retentiont_curve}}
+  \caption{The fraction of Astronomy PhDs still active as first authors.  Error bars show ranges computed by comparing the curves to those of just authors with unique names and uique names where all records are assumed to be linked.   \label{fig:retention_curve}}
 \end{figure*}
 
 \begin{figure}
 \plotone{../../new_plots/single_rc_50.pdf}
-\caption{The same data as in Fig~\ref{fig:retentiont_curve}, but now showing the time it has taken for each PhD cohort to drop to 50\% active.  It appears we are losing young astronomers four times faster than in 2000.  \label{fig:retention_50}}
+\caption{The same data as in Fig~\ref{fig:retention_curve}, but now showing the time it has taken for each PhD cohort to drop to 50\% active.  It appears we are losing young astronomers four times faster than in 2000.  \label{fig:retention_50}}
 \end{figure}
 
 %\begin{figure*}
@@ -222,7 +222,7 @@ Currently, 30\% of PhDs are immediatly leaving the field, double the fraction ty
 %  \caption{The 4, 6, and 10 year retention fractions as a function of PhD cohort year.\label{fig:retention}}
 %\end{figure}
 
-Figure~\ref{fig:active_curves} shows that recent PhDs are leaving the field much faster than a edcade ago.  The values of 70-80\% retention after 4-6 years may not sound so bad.  Figure~\ref{fig:1stA_active} perhaps helps explain what is going on. While recent PhDs are still apearing in the ADS archive at the 70-80\% level, they are still apearing as the first-author only 40-50\% of the time. A possible explination is that recent PhDs are leaving the field and their former collaborators are slowly finishing projects which they contributed to.
+%Figure~\ref{fig:active_curves} shows that recent PhDs are leaving the field much faster than a edcade ago.  The values of 70-80\% retention after 4-6 years may not sound so bad.  Figure~\ref{fig:1stA_active} perhaps helps explain what is going on. While recent PhDs are still apearing in the ADS archive at the 70-80\% level, they are still apearing as the first-author only 40-50\% of the time. A possible explination is that recent PhDs are leaving the field and their former collaborators are slowly finishing projects which they contributed to.
 
 % Another possibility is that few PhDs have first-author ADS entries every year. The cohorts from the 90's and early 00's all see marked downturns at the
 
@@ -244,7 +244,7 @@ There is also a mostly invisible effect on the field when the career potential d
 
 \citet{Cooray15} never seem to contimplate the possibility of simply funding fewer PhD students. They claim, "It is hard for universities to limit the number of students they enroll...". On the contrary, universities hire as many grad students as they can afford to, and rarely extend beyond that limit lest they get a reputation for not supporting students.  
 
-Given the sharp recent change in PhD retention seen in Figures~\ref{fig:1stA_active} and~\ref{fig:retention}, it is important to also consider the resulting impact the change will have on recruiting new graduate students. We never see the students who chose to not apply for graduate school. This is an important observational bias.  If astronomy PhD career prospects start to resemble Art History PhD career prospects, we should expect the technical skills of the two groups of graduate students to become more similar.  With poor career prospects, astronomy risks losing the ability to recruit top students. Law schools recently saw a drop in top student applications with the collapse of the legal job market (see \url{http://www.theatlantic.com/business/archive/2012/04/the-wrong-people-have-stopped-applying-to-law-school/255685/}).  
+Given the sharp recent change in PhD retention seen in Figure~\ref{fig:retention_curve}, it is important to also consider the resulting impact the change will have on recruiting new graduate students. We never see the students who chose to not apply for graduate school. This is an important observational bias.  If astronomy PhD career prospects start to resemble Art History PhD career prospects, we should expect the technical skills of the two groups of graduate students to become more similar.  With poor career prospects, astronomy risks losing the ability to recruit top students. Law schools recently saw a drop in top student applications with the collapse of the legal job market (see \url{http://www.theatlantic.com/business/archive/2012/04/the-wrong-people-have-stopped-applying-to-law-school/255685/}).  
 
 There seems to be little hope that university departments will undertake a grass-roots effort to improve the career pipeline. Thus, it seems to fall to the funding agencies to enforce better behavior.  One approach could be to require a minimum ratio of permanent-to-temporaty PhDs (and PhDs in training) in a department before that department can recieve federal funding.  This prevents reseach universities from running degree-mill type programs, or from relying too heavily on adjunts for teaching.  This also encentivises states to fund colleges at a reasonable level to maintain access to federal funding.  Another common proposed solution is to move federal funding away from univeristy departments and more towards permanent positions at national laboratories and observatories.
 
@@ -267,7 +267,7 @@ Using the bibliographic information in ADS, we find that retention of new Americ
 \acknowledgments
 Some work for this paper was done at the 2016 American Astronomical Association Hack Day. Thanks to sponsors of AAS Hack Day 2016, The Large Synoptic Survey Telescope and Northrop Grumman.
 
-This research has made use of NASA's Astrophysics Data System. Very heavy use. XXX-Add thanks to the ADS staff that bumped up my limit.
+This research has made use of NASA's Astrophysics Data System. Very heavy use. Thanks to Roman Chyla and the ADS staff who increased my daily query limit and gave helpful tips on optimizing ADS queries.
 
 \bibliography{bib}
 
