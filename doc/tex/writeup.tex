@@ -36,9 +36,15 @@ blah blah blah, abstract
 \keywords{employment}
 
 
-\section{TO DO}
+\section{code to cite}
+Maybe make a table for all the packages I used?
 \begin{itemize}
-\item{Just write text! }
+\item{ADS}
+\item{networkx}
+\item{numpy}
+\item{matplotlib}
+\item{sklearn.feature\_extraction.text TfidfVectorizer}
+\item{levenshtein https://github.com/semanticize/leven}
 \end{itemize}
 
 \section{Introduction}
@@ -49,16 +55,15 @@ It is difficult to determine the state of the Astronomy job market.  Analysis of
 
 In this paper, we use the SAO/NASA Astrophysics Data System (ADS) to explore the ramifications of that growing postdoc bubble.  While the NSF regularly surveys PhD recipients (e.g., \url{http://nsf.gov/statistics/nsf07305/}), even with high participation rates, surveys will tend to be biased against those that leave the field since they will be harder to contact.  Thus, we propose to use the publication record of PhDs to track the overall health of the field.  
 
-Unfortunately, some faculty still espouse the theory that, ``... the [astronomy faculty job] market is no worse or better than it is has been for at least a decade or two'' (via Charfman \url{http://jjcharfman.tumblr.com/}).  The goal of this paper is to check this statement and quantify the astronomy job market by tracking the digital footprints Astronomers leave in ADS. 
+Unfortunately, some faculty still espouse the theory that, ``... the [astronomy faculty job] market is no worse or better than it is has been for at least a decade or two'' (via Charfman\footnote{\url{http://jjcharfman.tumblr.com/}}).  The goal of this paper is to check the veracity of this statement and quantify the astronomy job market by tracking the digital footprints Astronomers leave in ADS. 
 
 XXX-description of ADS, how it includes peer-reviewed papers as well as things like conference proceedings, posters, grants, etc.
 
-Example of current tracking here \url{https://www.aip.org/sites/default/files/statistics/employment/phd1yrlater-p-14.pdf}--note that they only get info on 48\% of physics PhD reciepients.  We expect that ADS is much more complete in listing PhD's than 48\%.
+Example of current tracking here \footnote{\url{https://www.aip.org/sites/default/files/statistics/employment/phd1yrlater-p-14.pdf}}--note that they only get info on 48\% of physics PhD recipients.  We expect that ADS is much more complete in listing PhD's than 48\%.
 
 
-add citation to: http://www.ncbi.nlm.nih.gov/pmc/articles/PMC4309283/
-
-Larson, Richard C., Navid Ghaffarzadegan, and Yi Xue. “Too Many PhD Graduates or Too Few Academic Job Openings: The Basic Reproductive Number R0 in Academia.” Systems research and behavioral science 31.6 (2014): 745–750. PMC. Web. 14 July 2016.
+%add citation to: http://www.ncbi.nlm.nih.gov/pmc/articles/PMC4309283/
+%Larson, Richard C., Navid Ghaffarzadegan, and Yi Xue. “Too Many PhD Graduates or Too Few Academic Job Openings: The Basic Reproductive Number R0 in Academia.” Systems research and behavioral science 31.6 (2014): 745–750. PMC. Web. 14 July 2016.
 
 \section{Database Construction}\label{sec:db_construct}
 
@@ -74,7 +79,7 @@ XXX--So, we found 8820 phd's from 1997 to 2013, 2903 were determined to be uniqu
 
 For common names (e.g.,  Williams, B), our author query returns entries from multiple authors.  To try and restrict the results to only those papers with the same author as the PhD thesis, we construct a network graph of the ADS entries using \citet{networkx}.
 
-There can be variations in how author names are spelled, including capitalization variations (e.g., VanderPlas and Vanderplas) as well as variation in accent characters.  To ensure we match authors correctly, we reduce all author names to the format ``first initial, last name'', and consider names to match if they have a Levenshtein distance less than three.
+There can be variations in how author names are spelled, including capitalization variations (e.g., ``VanderPlas" \citep{VanderPlas12} and ``Vanderplas" \citep{van12}) as well as variation in the presence or absence of accent characters.  To ensure we match authors correctly, we reduce all author names to the format ``first initial, last name'', and consider names to match if they have a Levenshtein distance less than three.
 
 Every ADS entry is a node in our network. We draw an edge between nodes if they meet any of the following criteria:
 
@@ -87,15 +92,15 @@ Every ADS entry is a node in our network. We draw an edge between nodes if they 
   \item{If the relevant author's name matches exactly, and the entries share two keywords.}
 \end{itemize}
 
-For our affiliation matching, we consider the affiliations to match if one affiliation is contained in the other.  For example, ``University of Washington'' is considered a match to ``Department of Astronomy, University of Washington, Box 351580'' but not ``Washington University''.  We also compare the two affiliation strings with the python difflib SequenceMatcher, and consider any affiliations that have a similarity ratio greater than 0.7 as matching.  For example ``Berkeley'' and ``UC Berkeley'' have a ratio of 0.8, and would thus be considred matching.
+For our affiliation matching, we consider the affiliations to match if one affiliation is contained in the other.  For example, ``University of Washington'' is considered a match to ``Department of Astronomy, University of Washington, Box 351580'' but not ``Washington University''.  We also compare the two affiliation strings with the python difflib SequenceMatcher, and consider any affiliations that have a similarity ratio greater than 0.7 as matching.  For example ``Berkeley'' and ``UC Berkeley'' have a ratio of 0.8, and would thus be considered matching.
 
-This is an attempt at codifying the common-sense process one would take to infer if it is the same author on two papers. With author's being able to identify their papers with services such as ORCID\footnote{\url{http://orcid.org/}}, it should soon be possible to build a network of papers known to be linked to a single author as a training set for machine learning algorithms.  
+This is an attempt at codifying the common-sense process one naturally takes to infer if it is the same author on two papers. With authors being able to identify their papers with services such as ORCID\footnote{\url{http://orcid.org/}}, it should soon be possible to build a network of papers known to be linked to a single author as a training set for machine learning algorithms.  
 
 As the final step, we select only the entries which are linked to the PhD thesis of interest.  Some example ADS entry network graphs are shown in Figure~\ref{fig:example_networks}.
 
-Once we have selected only those entries we believe are connected to the thesis author, we demand that at least one of the entries be in a peer-reviewed astronomy journal or a contribution at a major astronomy conference to eliminate physics thesis entries.  The list of publications we use to label someone as an astronomer are listed in Table~\ref{table:journal_list}. We consider an ADS listed publication to be a match if any of our selected journals are contained in the publication string, e.g., ``Astrophysical Journal Letters'' would count as a match because it contains ``Astronomical Jounal'' which is in our list.  This step is necissary to remove PhD authors who would be better classified as Physists, Geophysists, Planeteray Scientists, etc. 
+Once we have selected only those entries we believe are connected to the thesis author, we demand that at least one of the entries be in a peer-reviewed astronomy journal to eliminate physics thesis entries.  The list of publications we use to label someone as an astronomer are listed in Table~\ref{table:journal_list}. We consider an ADS listed publication to be a match if any of our selected journals are contained in the publication string, e.g., ``Astrophysical Journal Letters'' would count as a match because it contains ``Astronomical Journal'' which is in our list.  This step is necessary to remove PhD authors who would be better classified as Physicists, Geophysicists, Planetary Scientists, etc. 
 
-We do not limit our search to only first-author publications for either the publication graph construction or determining if the author meets our criterion for being labled an ``astronomer''.
+We do not limit our search to only first-author publications for either the publication graph construction or determining if the author meets our criterion for being labeled an ``astronomer''.
 
 
 The ADS publication must match at least one of:
@@ -113,7 +118,8 @@ The ADS publication must match at least one of:
 Astronomy and Astrophysics & A\&A \\
 Astrophysical Journal & AJ \\
 Astronomical Journal & ApJ \\
-Monthly Notices of the Royal Astronomical Society & MNRAS 
+Monthly Notices of the Royal Astronomical Society & MNRAS \\
+Publications of the Astronomical Society of the Pacific & PASP 
 \enddata
 \end{deluxetable}
 
@@ -122,9 +128,9 @@ Thus, our definition of a US PhD astronomer is effectively a person who received
 
 We record the thesis author's most recent ADS entry date (need not be a peer-reviewed paper)  and a bunch of other stuff.
 
-We also flag if there are any other thesis entries (from any year) that match the last name, first initial of the thesis entry so that we can compare the full database to those with more unique names.
+For each US astronomer, we query ADS to look for any other PhD articles with the same first initial and last name (from any year).  We flag the author as having a unique name if this query only returns their thesis.  The subset of potentially unique PhD names can be used to test our name disambiguation techniques.
 
-One known issue is that ADS does not contain all Astronomy PhD dissertations. We found that XXX is not listed in ADS (see github issue).
+One known issue is that ADS does not necessarily contain all Astronomy PhD dissertations. We found that XXX is not listed in ADS (see github issue).
 
 
 \begin{figure*}
@@ -140,24 +146,23 @@ One known issue is that ADS does not contain all Astronomy PhD dissertations. We
 
 % Do any of those Williams papers overlap? NO not a one! Wow. Must be using middle initials.
 
-Possible ways we could fail to recognize an author has published for as long as they actually have (i.e., networks are under-linked):
+Possible ways we could fail to recognize an author has published for as long as they actually have (i.e., networks are under-linked) If an Astronomer:
 \begin{itemize}
-\item{If someone simultaneously changes institution and area of study}
-  \item{If an astronomer leaves the field for an extended time and re-joins in a different field}
-\item{If an astronomer changes their name (although authors can notify ADS of name changes)}
-  \item{}
+\item{simultaneously changes institution and area of study}
+\item{leaves the field for an extended time and re-joins in a different field}
+\item{changes their name (although authors can notify ADS of name changes)}
 \end{itemize}
 
-Ways we could mistakenly claim an author has published for longer than they actually have, we construct networks which suffer from over-linking:
+Ways we could mistakenly claim an author has published for longer than they actually have, we construct networks which suffer from over-linking, if two authors have similar names and:
 \begin{itemize}
-\item{If two authors have similar names and overlap at the same institution}
-\item{If two authors have similar names and similar reference lists in their papers}
-  \item{If two authors have similar names and similarly named co-authors}
+\item{overlap at the same institution}
+\item{similar reference lists in their papers}
+  \item{similarly named co-authors}
 \end{itemize}
 
 Thus there are two types of errors that can skew our results, over-linking our networks, connecting ADS entries that are not actually by the same author and under-linking, where we fail to recognize entries that are by the same author.  To look for the effects of over- and under-linking, we flag authors where the ADS database only lists one PhD thesis as matching their last name, and first initial. These represent less-common names that should suffer much lower rates of over-linking.
 
-Using the less-common name subset, we can also test for under-linking by assuming the names are unique and all the ADS entries returned for a name search should be linked.  We find little evidence of under-linking. Comparing the less-common name results changes the retention rate by only $\sim4$\%. When we test for under-linking, we find recent PhDs could be suffering from under-linking at the 5-8\% level, while older PhDs suffer under-linking at lower rates (2-4\%).  This should be slightly expected, as younger astronomers typically change institutions, and many will have not yet published papers that link back to their previously established cloud.  The important aspect is that the relative over- and under-linking between PhD cohorts is similar.  Thus, the recent dramatic (20\%) drop we observe in astronomer retention is real and not an artifact of how we assign ADS entries to authors.
+Using the less-common name subset, we can also test for under-linking by assuming the names are unique and all the ADS entries returned for a name search should be linked.  We find little evidence of under-linking. Comparing the less-common name results changes the retention rate by only $\sim4$\%. When we test for under-linking, we find recent PhDs could be suffering from under-linking at the 5-8\% level, while older PhDs suffer under-linking at lower rates (2-4\%).  This should be slightly expected, as younger astronomers have typically change institutions more recently, and many will have not yet published papers that link back to their previously established paper network cloud.  The important point is that the relative over- and under-linking between PhD cohorts is similar.  Thus, the recent dramatic (20\%) drop we observe in astronomer retention is real and not an artifact of how we assign ADS entries to authors.
 
 %\begin{figure*}
 %  \plotone{../../plots/span_linkCheck.pdf}
@@ -180,7 +185,7 @@ To test how much we are affected by over-linking ADS entries, we compare the ret
 
 \begin{figure*}
   \plotone{../../new_plots/single_rc_eb.pdf}
-  \caption{The fraction of Astronomy PhDs still active as first authors.  Error bars show ranges computed by comparing the curves to those of just authors with unique names and uique names where all records are assumed to be linked.   \label{fig:retention_curve}}
+  \caption{The fraction of Astronomy PhDs still active as first authors.  Error bars show ranges computed by comparing the curves to those of just authors with unique names and unique names where all records are assumed to be linked.   \label{fig:retention_curve}}
 \end{figure*}
 
 \begin{figure}
@@ -208,9 +213,9 @@ To test how much we are affected by over-linking ADS entries, we compare the ret
 
 Figure~\ref{fig:retention_curve} is particularly disturbing, less than 50\% of the 2009 to 2012 cohorts are still apearing as first authors on ADS entries. Note, these are any entries, we have not limited it to peer-reviewed papers.  This implies that most post-2008 USA-PhD astronomers now spend more time in graduate school than they do leading their own research projects post-graduation. Imagine if a corporation had a training program that lasted 3 months, and most of the employees who completed it left after 3 months post-training.  This seems an odd place in the career path to place a bottleneck.
 
-There is a potential bias if authors pubilsh as first authors on intervals longer than a year.  If that is the case, we would expect the last few points of each cohort curve in Figure~\ref{fig:retention_curve} to be slightly depressed.  XXX--go through and compute the typical time gap between linked 1st author papers.  
+There is a potential bias if authors publish as first authors on intervals longer than a year.  If that is the case, we would expect the last few points of each cohort curve in Figure~\ref{fig:retention_curve} to be slightly depressed.  XXX--go through and compute the typical time gap between linked 1st author papers.  
 
-Currently, 30\% of PhDs are immediatly leaving the field, double the fraction typical pre-2008.  
+Currently, 30\% of PhDs are immediately leaving the field, double the fraction typical pre-2008.  
 
 %Figure~\ref{fig:non_1st_frac} shows the fraction of PhDs that are still in ADS, but not as first authors.  Each cohort shows a sharp rise in the past 2-3 years. We suspect this could be an artifact where after 8-15 years, some active astronomers have moved to mentoring roles where they do not publish as first authors every year.  Thus, if we re-ran the experiment several years from now, those sharp rises would shift to the right.
 
@@ -240,23 +245,23 @@ The failure to retain early-career Astronomers is analogous to building 4 new te
 There is also a mostly invisible effect on the field when the career potential drops, the best and brightest may chose to never enter the field.  The recent popping of the law school bubble %xxx-see \url{http://www.theatlantic.com/business/archive/2012/04/the-wrong-people-have-stopped-applying-to-law-school/255685/} and \url{http://www.lsac.org/lsacresources/data/lsats-administered}, \url{http://www.slate.com/blogs/moneybox/2014/08/21/law_school_applications_more_students_with_high_lsats_are_applying.html} for a starting place.
 
 
-\citet{Cooray15} title their paper "Astronomy job crisis".  They contend that the solution to PhD overproduction is to change the culture within astronomy so that careers outside acedemia are the top priority of PhD students. This seems like a rather bizaar proposition that has no chance of succeeding. If one's goal is to persue a career in industry, why would one start a PhD program in astronomy? While there is growing consensus that the astronomy community must be more supportive of those who chose to leave the field, we need to aknowledge the basic fact that students start astronomy programs because they are interested in having astronomy careers.  When a recent top-notch physics major declares they would like to study astrophysics, it seems fairly patronizing to tell them they should instead follow a course of study to prepare them for an industry job. Students will simply chose the programs that provide the training they are seeking.
+\citet{Cooray15} title their paper ``Astronomy job crisis".  They contend that the solution to PhD overproduction is to change the culture within astronomy so that careers outside academia are the top priority of PhD students. This seems like a rather bizaar proposition that has no chance of succeeding. If one's goal is to peruse a career in industry, why would one start a PhD program in astronomy? While there is growing consensus that the astronomy community must be more supportive of those who chose to leave the field, we need to acknowledge the basic fact that students start astronomy programs because they are interested in having astronomy careers.  When a recent top-notch physics major declares they would like to study astrophysics, it seems fairly patronizing to tell them they should instead follow a course of study to prepare them for an industry job. Students will simply chose the programs that provide the training they are seeking.
 
-\citet{Cooray15} never seem to contimplate the possibility of simply funding fewer PhD students. They claim, "It is hard for universities to limit the number of students they enroll...". On the contrary, universities hire as many grad students as they can afford to, and rarely extend beyond that limit lest they get a reputation for not supporting students.  
+\citet{Cooray15} never seem to contemplate the possibility of simply funding fewer PhD students. They claim, ``It is hard for universities to limit the number of students they enroll...". On the contrary, universities hire as many grad students as they can afford to, and rarely extend beyond that limit lest they get a reputation for not supporting students.  
 
-Given the sharp recent change in PhD retention seen in Figure~\ref{fig:retention_curve}, it is important to also consider the resulting impact the change will have on recruiting new graduate students. We never see the students who chose to not apply for graduate school. This is an important observational bias.  If astronomy PhD career prospects start to resemble Art History PhD career prospects, we should expect the technical skills of the two groups of graduate students to become more similar.  With poor career prospects, astronomy risks losing the ability to recruit top students. Law schools recently saw a drop in top student applications with the collapse of the legal job market (see \url{http://www.theatlantic.com/business/archive/2012/04/the-wrong-people-have-stopped-applying-to-law-school/255685/}).  
+Given the sharp recent change in PhD retention seen in Figure~\ref{fig:retention_curve}, it is important to also consider the resulting impact the change will have on recruiting new graduate students. We never see the students who chose to not apply for graduate school. This is an important observational bias.  If astronomy PhD career prospects start to resemble Art History PhD career prospects, we should expect the technical skills of the two groups of graduate students to become more similar.  With poor career prospects, astronomy risks losing the ability to recruit top students. Law schools recently saw a drop in top student applications with the collapse of the legal job market\footnote{\url{http://www.theatlantic.com/business/archive/2012/04/the-wrong-people-have-stopped-applying-to-law-school/255685/}}.  
 
-There seems to be little hope that university departments will undertake a grass-roots effort to improve the career pipeline. Thus, it seems to fall to the funding agencies to enforce better behavior.  One approach could be to require a minimum ratio of permanent-to-temporaty PhDs (and PhDs in training) in a department before that department can recieve federal funding.  This prevents reseach universities from running degree-mill type programs, or from relying too heavily on adjunts for teaching.  This also encentivises states to fund colleges at a reasonable level to maintain access to federal funding.  Another common proposed solution is to move federal funding away from univeristy departments and more towards permanent positions at national laboratories and observatories.
+There seems to be little hope that university departments will undertake a grass-roots effort to improve the career pipeline. Thus, it seems to fall to the funding agencies to enforce better behavior.  One approach could be to require a minimum ratio of permanent-to-temporary PhDs (and PhDs in training) in a department before that department can receive federal funding.  This prevents research universities from running degree-mill type programs, or from relying too heavily on adjuncts for teaching.  This also encourages states to fund colleges at a reasonable level to maintain access to federal funding.  Another common proposed solution is to move federal funding away from university departments and more towards permanent positions at national laboratories and observatories.
 
 
 \subsection{Future Work}
 
-The ability to identify individuals via their PhD and track their career progress via their apperances in ADS entries opens up a number of possible future studies including
+The ability to identify individuals via their PhD and track their career progress via their appearances in ADS entries opens up a number of possible future studies including
 \begin{itemize}
 \item{Extending this analysis to countries beyond the US.}
-\item{For many author networks, it should be possible to programatically guess the author's gender, alowing one to compare career trajectories based on gender.}
+\item{For many author networks, it should be possible to programatically guess the author's gender, allowing one to compare career trajectories based on gender.}
 \item{One could analyze the network of PhD granting institutions and final hiring institutions to rank the prestige of graduate programs as in \citet{Clausete15}.}
-\item{The technique of linking publication hsitories to PhDs can easily be extended to other fields.}
+\item{The technique of linking publication histories to PhDs can easily be extended to other fields.}
 \end{itemize}
 
 \section{Conclusions}
