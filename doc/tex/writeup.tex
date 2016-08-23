@@ -1,5 +1,6 @@
 %\documentclass[12pt,preprint]{aastex}
-\documentclass{emulateapj}
+\documentclass[preprint2]{aastex}
+%\documentclass{emulateapj}
 \usepackage{url}
 %\usepackage{natbib}
 %\usepackage{xspace}
@@ -23,8 +24,8 @@
 
 \title{Publication Lifetimes of American Astronomy PhDs: A Post-2008 Collapse}
 
-\author{Peter Yoachim\altaffilmark{1}, author 2, author 3 
-  }
+\author{Peter Yoachim\altaffilmark{1}}, \author{author 2}, \author{author 3} 
+  
 \altaffiltext{1}{Department of Astronomy, University of Washington, Box 351580,
 Seattle WA, 98195; {yoachim@uw.edu} }
 
@@ -36,18 +37,6 @@ blah blah blah, abstract
 \keywords{employment}
 
 
-\section{code to cite}
-Maybe make a table for all the packages I used?
-\begin{itemize}
-\item{ADS}
-\item{networkx}
-\item{numpy}
-\item{matplotlib}
-\item{pandas}
-\item{scipy}
-\item{sklearn.feature\_extraction.text TfidfVectorizer}
-\item{levenshtein https://github.com/semanticize/leven}
-\end{itemize}
 
 \section{Introduction}
 
@@ -132,7 +121,7 @@ We record the thesis author's most recent ADS entry date (need not be a peer-rev
 
 For each US astronomer, we query ADS to look for any other PhD articles with the same first initial and last name (from any year).  We flag the author as having a unique name if this query only returns their thesis.  The subset of potentially unique PhD names can be used to test our name disambiguation techniques.
 
-One known issue is that ADS does not necessarily contain all Astronomy PhD dissertations. We found that XXX is not listed in ADS (see github issue).
+One known issue is that ADS does not necessarily contain all Astronomy PhD dissertations. When we ran our code \citet{Pagnotta12} was not listed in ADS (but now appears).
 
 
 \begin{figure*}
@@ -242,12 +231,12 @@ Note:  The curves looked weird if we included years before 1997. This could be b
 
 With a large increase in funding from XXXX to XXX, driven largely by NASA, there has been an increase in Astronomy PhD production with little to no increase in long-term positions for these PhDs.  This needs to be recognized as a failure of Astronomy funding agencies, as they paid to develop a talented workforce with no plans to retain that talent. Similarly, we must hold professional organizations responsible for failing to advocate for a funding stream allocated for the long-term health of the field.  
 
-The failure to retain early-career Astronomers is analogous to building 4 new telescopes, when one knows there will only be enough funding to operate 2.  Such a lack of planning and wasteful use of research funding would not be tolerated with hardware, and it should not be tolerated with meatware. 
+The failure to retain early-career Astronomers is analogous to building 4 new telescopes, when one knows there will only be enough funding to operate 2.  Such a lack of planning and wasteful use of research funding would not be tolerated with hardware, and it should not be tolerated with meatware. Another relevant analogy would be if a company paid to train 100 new employees when it only expected to hire 25. Given the stringent requirements to gain entry to an astrophysics PhD program, it seems unlikely that the community is successfully selecting the top potential early-career scientists to give long-term jobs to. Instead, we have created a large pool of talented PhDs where luck is the dominant factor in success rather than some sort of meritocracy. 
 
-There is also a mostly invisible effect on the field when the career potential drops, the best and brightest may chose to never enter the field.  The recent popping of the law school bubble %xxx-see \url{http://www.theatlantic.com/business/archive/2012/04/the-wrong-people-have-stopped-applying-to-law-school/255685/} and \url{http://www.lsac.org/lsacresources/data/lsats-administered}, \url{http://www.slate.com/blogs/moneybox/2014/08/21/law_school_applications_more_students_with_high_lsats_are_applying.html} for a starting place.
+%There is also a mostly invisible effect on the field when the career potential drops, the best and brightest may chose to never enter the field.  The recent popping of the law school bubble %xxx-see \url{http://www.theatlantic.com/business/archive/2012/04/the-wrong-people-have-stopped-applying-to-law-school/255685/} and \url{http://www.lsac.org/lsacresources/data/lsats-administered}, \url{http://www.slate.com/blogs/moneybox/2014/08/21/law_school_applications_more_students_with_high_lsats_are_applying.html} for a starting place.
 
 
-\citet{Cooray15} title their paper ``Astronomy job crisis".  They contend that the solution to PhD overproduction is to change the culture within astronomy so that careers outside academia are the top priority of PhD students. This seems like a rather bizaar proposition that has no chance of succeeding. If one's goal is to peruse a career in industry, why would one start a PhD program in astronomy? While there is growing consensus that the astronomy community must be more supportive of those who chose to leave the field, we need to acknowledge the basic fact that students start astronomy programs because they are interested in having astronomy careers.  When a recent top-notch physics major declares they would like to study astrophysics, it seems fairly patronizing to tell them they should instead follow a course of study to prepare them for an industry job. Students will simply chose the programs that provide the training they are seeking.
+\citet{Cooray15} title their paper ``Astronomy job crisis".  They contend that the solution to PhD overproduction is to change the culture within astronomy so that careers outside academia are the top priority of PhD students. This seems like a rather bizaar proposition that has no chance of succeeding. If one's goal is to peruse a career in industry, why would one start a PhD program in astronomy? While there is growing consensus that the astronomy community must be more supportive of those who chose to leave the field, we need to acknowledge the basic fact that students start astronomy programs because they are interested in having astronomy careers.  When a recent top physics major declares they would like to study astrophysics, it seems fairly patronizing to tell them they should instead follow a course of study to prepare them for an industry job. Students will simply chose the programs that provide the training they are seeking.
 
 \citet{Cooray15} never seem to contemplate the possibility of simply funding fewer PhD students. They claim, ``It is hard for universities to limit the number of students they enroll...". On the contrary, universities hire as many grad students as they can afford to, and rarely extend beyond that limit lest they get a reputation for not supporting students.  
 
@@ -275,6 +264,19 @@ Using the bibliographic information in ADS, we find that retention of new Americ
 Some work for this paper was done at the 2016 American Astronomical Association Hack Day. Thanks to sponsors of AAS Hack Day 2016, The Large Synoptic Survey Telescope and Northrop Grumman.
 
 This research has made use of NASA's Astrophysics Data System. Very heavy use. Thanks to Roman Chyla and the ADS staff who increased my daily query limit and gave helpful tips on optimizing ADS queries.
+
+XXX-follow up with this link: https://www.scipy.org/citing.html
+\software{Numpy}
+\software{Matplotlib}
+\software{Networkx}
+\software{Pandas}
+\software{https://github.com/andycasey/ads}
+\software{Scipy}
+\software{Sklearn sklearn.feature\_extraction.text TfidfVectorizer}
+\software{Levenshtein \url{https://github.com/semanticize/leven}}
+\software{matplotlib\_pubplots \url{https://github.com/yoachim/matplotlib_pubplots}}
+
+
 
 \bibliography{bib}
 
