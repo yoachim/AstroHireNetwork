@@ -42,7 +42,7 @@ blah blah blah, abstract
 
 It is difficult to determine the state of the Astronomy job market.  Analysis of the science job market often lumps all sciences together, in which case Biologists dominate the statistics, or, if the sciences are separated, Astronomy is usually grouped with Physics (e.g., the Bureau of Labor and Statistics lists 20,000 Physicists and Astronomers jobs in 2014 \footnote{\url{http://www.bls.gov/ooh/life-physical-and-social-science/physicists-and-astronomers.htm}}), where the number of Physicists outnumbers the Astronomers.  The American Astronomical Society currently lists it's membership at around 7,000.
 
-\citet{Seth09} build on the work of \citet{Metcalfe08} and looks at the rise of the postdoc era in Astronomy and Astrophysics.  They show that as the inflation-adjusted US-Astronomy budget doubled over 20 years, there was a modest increase in PhD production and a huge rise in the number of temporary postdoc positions.
+\citet{Seth09} builds on the work of \citet{Metcalfe08} and looks at the rise of the postdoc era in Astronomy and Astrophysics.  They show that as the inflation-adjusted US-Astronomy budget doubled over 20 years, there was a modest increase in PhD production and a huge rise in the number of temporary postdoc positions.
 
 In this paper, we use the SAO/NASA Astrophysics Data System (ADS) to explore the ramifications of that growing postdoc bubble.  While the NSF regularly surveys PhD recipients (e.g., \url{http://nsf.gov/statistics/nsf07305/}), even with high participation rates, surveys will tend to be biased against those that leave the field since they will be harder to contact.  Thus, we propose to use the publication record of PhDs to track the overall health of the field.  
 
@@ -64,23 +64,23 @@ We use the excellent {\emph{Python Module to Interact with NASA's ADS that Doesn
 
 Our procedure for building a database of Astronomy and Astrophysics PhDs is as follows.  We select all PhD Thesis records for a given year and screen to include only those records that have an affiliation in the United States.
 
-For each US PhD, we then query ADS for all entries with the PhD author's last name and first initial with a date limit of 7 years pre-PhD to the present (Jan 2016).
+For each US PhD, we then query ADS for all entries with the PhD author's last name and first initial with a date limit of 7 years pre-PhD to the present (we searched ADS in January, 2016).
 
 XXX--So, we found 8820 phd's from 1997 to 2013, 2903 were determined to be unique Astronomy and from the US. Resulting in 19 Mb of space.  
 
-For common names (e.g.,  Williams, B), our author query returns entries from multiple authors.  To try and restrict the results to only those papers with the same author as the PhD thesis, we construct a network graph of the ADS entries using \citet{networkx}.
+For common names (e.g.,  ``Williams, B"), our author query returns entries from multiple authors.  To try and restrict the results to only those papers with the same author as the PhD thesis, we construct a network graph of the ADS entries using Networkx \citet{networkx}.
 
-There can be variations in how author names are spelled, including capitalization variations (e.g., ``VanderPlas" \citep{VanderPlas12} and ``Vanderplas" \citep{van12}) as well as variation in the presence or absence of accent characters.  To ensure we match authors correctly, we reduce all author names to the format ``first initial, last name'', and consider names to match if they have a Levenshtein distance less than three.
+There can be variations in how author names are spelled, including capitalization variations (e.g., ``VanderPlas" \citep{VanderPlas12} and ``Vanderplas" \citep{van12}) as well as variation in the presence or absence of accent characters.  To ensure we match authors correctly, we reduce all author name searches to the format ``first initial, last name'', and consider names to match if they have a Levenshtein distance less than three.
 
-Every ADS entry is a node in our network. We draw an edge between nodes if they meet any of the following criteria:
+Every ADS entry is a node in an author network. We draw an edge between nodes if they meet any of the following criteria:
 
 \begin{itemize}
 \item{If the affiliations (of the possible thesis author) match, and the entries have publication years within 2 years or each other.}
 \item{If the entries have 3 or more authors in common in their author lists.}
 \item{If there are two authors and they are identical on the two entries.}
 \item{If the information contained in the abstracts are similar enough (ratio $> 0.5$) as measured by XXX-magic fucking black boxXXX TfidfVectorizer from \citet{scikit-learn}}
-\item{If the information contained in the titles of the entries are similar enough.}
-  \item{If the relevant author's name matches exactly, and the entries share two keywords.}
+\item{If the information contained in the titles of the entries are similar enough XXX-quote threshold.}
+\item{If the relevant author's name matches exactly, and the entries share two or more keywords.}
 \end{itemize}
 
 For our affiliation matching, we consider the affiliations to match if one affiliation is contained in the other.  For example, ``University of Washington'' is considered a match to ``Department of Astronomy, University of Washington, Box 351580'' but not ``Washington University''.  We also compare the two affiliation strings with the python difflib SequenceMatcher, and consider any affiliations that have a similarity ratio greater than 0.7 as matching.  For example ``Berkeley'' and ``UC Berkeley'' have a ratio of 0.8, and would thus be considered matching.
@@ -91,7 +91,7 @@ As the final step, we select only the entries which are linked to the PhD thesis
 
 Once we have selected only those entries we believe are connected to the thesis author, we demand that at least one of the entries be in a peer-reviewed astronomy journal to eliminate physics thesis entries.  The list of publications we use to label someone as an astronomer are listed in Table~\ref{table:journal_list}. We consider an ADS listed publication to be a match if any of our selected journals are contained in the publication string, e.g., ``Astrophysical Journal Letters'' would count as a match because it contains ``Astronomical Journal'' which is in our list.  This step is necessary to remove PhD authors who would be better classified as Physicists, Geophysicists, Planetary Scientists, etc. 
 
-We do not limit our search to only first-author publications for either the publication graph construction or determining if the author meets our criterion for being labeled an ``astronomer''.
+We do not limit our search to only first-author publications for either the publication graph construction or determining if the author meets our criterion for being labeled an ``astronomer''. We also do not limit the query to peer-reviwed journals, thus our query results include things like conference posters and grant proposals.  We treat these results identically to journal articles when constructing the author networks. 
 
 
 The ADS publication must match at least one of:
@@ -127,12 +127,12 @@ One known issue is that ADS does not necessarily contain all Astronomy PhD disse
 \begin{figure*}
   \plottwo{../../new_plots/single_example_network_0.pdf}{../../new_plots/single_example_network_1.pdf}\\
     \plottwo{../../new_plots/single_example_network_2.pdf}{../../new_plots/single_example_network_3.pdf}
-        \caption{Examples of network graphs constructed to find papers linked to individual PhD thesis entries in ADS.   (a) Network of ADS entries with the same author as \citet{Yoachim07} (46 entries, 44 linked to the PhD), (b) Network for \citet{Bellm2011} (106 entries, 99 linked),(c) Network for \citet{Williams02}, (315 papers, 270 linked) (d) Network for \citet{Williams11} (158 papers, 113 linked).  Note, none of the linked papers for the two Williams, B PhDs overlap. \label{fig:example_networks}}
+        \caption{Examples of network graphs constructed to find papers linked to individual PhD thesis entries in ADS.   (a) Network of ADS entries with the same author as \citet{Yoachim07} (46 entries, 44 linked to the PhD), (b) Network for \citet{Bellm2011} (106 entries, 99 linked),(c) Network for \citet{Williams02}, (315 papers, 270 linked) (d) Network for \citet{Williams11} (158 papers, 113 linked).  Note, none of the linked papers for the two ``Williams, B" PhDs overlap, suggesting our network construction procedure has correctly disambiguated the two authors. \label{fig:example_networks}}
 \end{figure*}
 
 \begin{figure}
   \plotone{../../new_plots/single_example_network_4.pdf}
-  \caption{Example of an ADS networks that suffers from under-linking.  (e) The under-linked network of \citet{Capelo12}.  A single ADS entry in the future could link a network back together.}
+  \caption{Example of an ADS networks that suffers from under-linking.  (e) The under-linked network of \citet{Capelo12}.  A single ADS entry in the future could link a network back together. \label{fig:underlinked}}
 \end{figure}
 
 % Do any of those Williams papers overlap? NO not a one! Wow. Must be using middle initials.
@@ -151,13 +151,13 @@ Ways we could mistakenly claim an author has published for longer than they actu
   \item{similarly named co-authors}
 \end{itemize}
 
-Thus there are two types of errors that can skew our results, over-linking our networks, connecting ADS entries that are not actually by the same author and under-linking, where we fail to recognize entries that are by the same author.  To look for the effects of over- and under-linking, we flag authors where the ADS database only lists one PhD thesis as matching their last name, and first initial. These represent less-common names that should suffer much lower rates of over-linking.
+Thus there are two types of errors that can skew our results, over-linking our networks, connecting ADS entries that are not actually by the same author and under-linking, where we fail to recognize entries that are by the same author.  To look for the effects of over- and under-linking, we flag authors where the ADS database only lists one PhD thesis as matching their last name, and first initial. These represent less-common names that should suffer much lower rates of over-linking. Figure~\ref{fig:example_networks} panels (a) and (b) show authors with unique names. These two network clouds suffer from no over-linking and a very low level of under-linking that does not hinder our ability to correctly measure the last year the authors had a first-author entry.  Figure~\ref{fig:underlinked} shows an example network cloud where the under-linking is severe enough to make us incorrectly assume the author is no longer active as a first author.
 
 Using the less-common name subset, we can also test for under-linking by assuming the names are unique and all the ADS entries returned for a name search should be linked.  We find little evidence of under-linking. Comparing the less-common name results changes the retention rate by only $\sim4$\%. When we test for under-linking, we find recent PhDs could be suffering from under-linking at the 5-8\% level, while older PhDs suffer under-linking at lower rates (2-4\%).  This should be slightly expected, as younger astronomers have typically change institutions more recently, and many will have not yet published papers that link back to their previously established paper network cloud.  The important point is that the relative over- and under-linking between PhD cohorts is similar.  Thus, the recent dramatic (20\%) drop we observe in astronomer retention is real and not an artifact of how we assign ADS entries to authors.
 
 %\begin{figure*}
 %  \plotone{../../plots/span_linkCheck.pdf}
-%  \caption{Solid lines show the residuals when comparing to retention curves constructed with unique names (e.g., a sub-sample that should suffer from little to no over-linking).  The dashed lines shows the comparision to unique names when the unique name group is assumed to have a completely linked network (e.g., a subsample that suffers from little to no under-linking).  \label{fig:unames}}
+%  \caption{Solid lines show the residuals when comparing to retention curves constructed with unique names (e.g., a sub-sample that should suffer from little to no over-linking).  The dashed lines shows the comparison to unique names when the unique name group is assumed to have a completely linked network (e.g., a subsample that suffers from little to no under-linking).  \label{fig:unames}}
 %  \end{figure*}
 
 
@@ -176,7 +176,7 @@ To test how much we are affected by over-linking ADS entries, we compare the ret
 
 \begin{figure*}
   \plotone{../../new_plots/single_rc_eb.pdf}
-  \caption{The fraction of Astronomy PhDs still active as first authors.  Error bars show ranges computed by comparing the curves to those of just authors with unique names and unique names where all records are assumed to be linked.   \label{fig:retention_curve}}
+  \caption{The fraction of Astronomy PhDs still active as first authors on any type of ADS entry (e.g., peer-reviewed journal articles, conference proceedings, grant proposals, arXive papers, etc).  Error bars show ranges computed by comparing the curves to those of authors with unique names and unique names where all records are assumed to be linked.   \label{fig:retention_curve}}
 \end{figure*}
 
 \begin{figure}
@@ -202,7 +202,7 @@ To test how much we are affected by over-linking ADS entries, we compare the ret
 
 
 
-Figure~\ref{fig:retention_curve} is particularly disturbing, less than 50\% of the 2009 to 2012 cohorts are still apearing as first authors on ADS entries. Note, these are any entries, we have not limited it to peer-reviewed papers.  This implies that most post-2008 USA-PhD astronomers now spend more time in graduate school than they do leading their own research projects post-graduation. Imagine if a corporation had a training program that lasted 3 months, and most of the employees who completed it left after 3 months post-training.  This seems an odd place in the career path to place a bottleneck.
+Figure~\ref{fig:retention_curve} is particularly disturbing, less than 50\% of the 2009 to 2012 cohorts are still appearing as first authors on ADS entries. Note, these are any entries, we have not limited it to peer-reviewed papers.  This implies that most post-2008 USA-PhD astronomers now spend more time in graduate school than they do leading their own research projects post-graduation. Imagine if a corporation had a training program that lasted 3 months, and most of the employees who completed it left after 3 months post-training.  This seems an odd place in the career path to place a bottleneck.
 
 There is a potential bias if authors publish as first authors on intervals longer than a year.  If that is the case, we would expect the last few points of each cohort curve in Figure~\ref{fig:retention_curve} to be slightly depressed.  XXX--go through and compute the typical time gap between linked 1st author papers.  
 
@@ -231,7 +231,7 @@ Note:  The curves looked weird if we included years before 1997. This could be b
 
 With a large increase in funding from XXXX to XXX, driven largely by NASA, there has been an increase in Astronomy PhD production with little to no increase in long-term positions for these PhDs.  This needs to be recognized as a failure of Astronomy funding agencies, as they paid to develop a talented workforce with no plans to retain that talent. Similarly, we must hold professional organizations responsible for failing to advocate for a funding stream allocated for the long-term health of the field.  
 
-The failure to retain early-career Astronomers is analogous to building 4 new telescopes, when one knows there will only be enough funding to operate 2.  Such a lack of planning and wasteful use of research funding would not be tolerated with hardware, and it should not be tolerated with meatware. Another relevant analogy would be if a company paid to train 100 new employees when it only expected to hire 25. Given the stringent requirements to gain entry to an astrophysics PhD program, it seems unlikely that the community is successfully selecting the top potential early-career scientists to give long-term jobs to. Instead, we have created a large pool of talented PhDs where luck is the dominant factor in success rather than some sort of meritocracy. 
+The failure to retain early-career Astronomers is analogous to building 4 new telescopes, when one knows there will only be enough funding to operate 2.  Such a lack of planning and wasteful use of research funding would not be tolerated with hardware, and it should not be tolerated with meatware. Given the stringent requirements to gain entry to an astrophysics PhD program, it seems unlikely that the community is successfully selecting the top potential early-career scientists to give long-term jobs to. Instead, we have created a large pool of talented PhDs where luck is the dominant factor in success rather than some sort of meritocracy. 
 
 %There is also a mostly invisible effect on the field when the career potential drops, the best and brightest may chose to never enter the field.  The recent popping of the law school bubble %xxx-see \url{http://www.theatlantic.com/business/archive/2012/04/the-wrong-people-have-stopped-applying-to-law-school/255685/} and \url{http://www.lsac.org/lsacresources/data/lsats-administered}, \url{http://www.slate.com/blogs/moneybox/2014/08/21/law_school_applications_more_students_with_high_lsats_are_applying.html} for a starting place.
 
@@ -265,16 +265,15 @@ Some work for this paper was done at the 2016 American Astronomical Association 
 
 This research has made use of NASA's Astrophysics Data System. Very heavy use. Thanks to Roman Chyla and the ADS staff who increased my daily query limit and gave helpful tips on optimizing ADS queries.
 
-XXX-follow up with this link: https://www.scipy.org/citing.html
-\software{Numpy}
-\software{Matplotlib}
-\software{Networkx}
-\software{Pandas}
-\software{https://github.com/andycasey/ads}
-\software{Scipy}
-\software{Sklearn sklearn.feature\_extraction.text TfidfVectorizer}
-\software{Levenshtein \url{https://github.com/semanticize/leven}}
-\software{matplotlib\_pubplots \url{https://github.com/yoachim/matplotlib_pubplots}}
+\software{Numpy \citep{numpy}}
+\software{Matplotlib \citep{matplotlib}}
+\software{Networkx \citep{networkx}}
+\software{Pandas \citep{pandas}}
+\software{A Python Module to Interact with NASA's ADS that Doesn't Suck\textsuperscript{TM} \url{https://github.com/andycasey/ads}}
+\software{Scipy \citep{scipy}}
+\software{Sklearn \citep{scikit-learn}}
+\software{Leven \url{https://github.com/semanticize/leven}}
+\software{Matplotlib\_pubplots \url{https://github.com/yoachim/matplotlib_pubplots}}
 
 
 
