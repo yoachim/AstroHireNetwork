@@ -46,9 +46,9 @@ It is difficult to determine the state of the Astronomy job market.  Analysis of
 
 In this paper, we use the SAO/NASA Astrophysics Data System (ADS) to explore the ramifications of that growing postdoc bubble.  While the NSF regularly surveys PhD recipients (e.g., \url{http://nsf.gov/statistics/nsf07305/}), even with high participation rates, surveys will tend to be biased against those that leave the field since they will be harder to contact.  Thus, we propose to use the publication record of PhDs to track the overall health of the field.  
 
-Unfortunately, some faculty still claim, ``... the [astronomy faculty job] market is no worse or better than it is has been for at least a decade or two'' (via Charfman\footnote{\url{http://jjcharfman.tumblr.com/}}).  The goal of this paper is to check the veracity of this statement and quantify the astronomy job market by tracking the digital footprints Astronomers leave in ADS. 
+Unfortunately, some faculty still claim, ``Yet the [astronomy faculty job] market is no worse or better than it is has been for at least a decade or two.'' (via Charfman\footnote{\url{http://jjcharfman.tumblr.com/}}).  The goal of this paper is to check the veracity of this statement and quantify the astronomy job market by tracking the digital footprints Astronomers leave in ADS. 
 
-XXX-description of ADS, how it includes peer-reviewed papers as well as things like conference proceedings, posters, grants, proposals, etc.
+The ADS is an abstracting service offering a search interface into the scientific and technical literature covering astronomy, planetary science, physics, and the arXiv e-prints.  ADS includes more than 12.2 million listings for peer-reviewed papers as well as conference proceedings, conference posters, grants and, importantly for this paper, PhD Theses.  
 
 Example of current tracking here \footnote{\url{https://www.aip.org/sites/default/files/statistics/employment/phd1yrlater-p-14.pdf}}--note that they only get info on 48\% of physics PhD recipients.  We expect that ADS is much more complete in listing PhD's than 48\%.
 
@@ -64,11 +64,9 @@ We use the excellent {\emph{Python Module to Interact with NASA's ADS that Doesn
 
 Our procedure for building a database of Astronomy and Astrophysics PhDs is as follows.  We select all PhD Thesis records for a given year and screen to include only those records that have an affiliation in the United States.
 
-For each US PhD, we then query ADS for all entries with the PhD author's last name and first initial with a date limit of 7 years pre-PhD to the present (we searched ADS in January, 2016).
+For each US PhD, we then query ADS for all entries with the PhD author's last name and first initial with a date limit of 7 years pre-PhD to the present (we searched ADS in January, 2016). We found 8820 PhDs from 1997 to 2013, 2903 were determined to be unique Astronomy and from the USA.
 
-XXX--So, we found 8820 phd's from 1997 to 2013, 2903 were determined to be unique Astronomy and from the US. Resulting in 19 Mb of space.  
-
-For common names (e.g.,  ``Williams, B"), our author query returns entries from multiple authors.  To try and restrict the results to only those papers with the same author as the PhD thesis, we construct a network graph of the ADS entries using Networkx \citet{networkx}.
+For common names (e.g.,  ``Williams, B"), our subsequent author query returns entries from multiple authors.  To try and restrict the results to only those papers with the same author as the PhD thesis, we construct a network graph of the ADS results using Networkx \citet{networkx}.
 
 There can be variations in how author names are spelled, including capitalization variations (e.g., ``VanderPlas" \citep{VanderPlas12} and ``Vanderplas" \citep{van12}) as well as variation in the presence or absence of accent characters.  To ensure we match authors correctly, we reduce all author name searches to the format ``first initial, last name'', and consider names to match if they have a Levenshtein distance less than three.
 
@@ -78,9 +76,9 @@ Every ADS entry is a node in an author network. We draw an edge between nodes if
 \item{If the affiliations (of the possible thesis author) match, and the entries have publication years within 2 years or each other.}
 \item{If the entries have 3 or more authors in common in their author lists.}
 \item{If there are two authors and they are identical on the two entries.}
-\item{If the information contained in the abstracts are similar enough (ratio $> 0.5$) as measured by XXX-magic fucking black boxXXX TfidfVectorizer from \citet{scikit-learn}}
-\item{If the information contained in the titles of the entries are similar enough XXX-quote threshold.}
-\item{If the relevant author's name matches exactly, and the entries share two or more keywords.}
+\item{If the information contained in the abstracts are similar enough.  We use sklearn \citet{scikit-learn} to convert the abstract text of each entry (if available) to a matrix of TF-IDF features.  If two abstracts in the matrix exceed a threshold (ratio $> 0.5$), we consider them similar enough that the entries should be connected}
+\item{If the information contained in the titles of the entries are similar enough.  As with the abstracts, we use a ratio of $>0.5$. XXX--should show an example of this.}
+\item{If the relevant author's name matches exactly (identical spelling, capitalization, accent charters, middle initials/name, etc.), and the entries share two or more keywords.}
 \end{itemize}
 
 For our affiliation matching, we consider the affiliations to match if one affiliation is contained in the other.  For example, ``University of Washington'' is considered a match to ``Department of Astronomy, University of Washington, Box 351580'' but not ``Washington University''.  We also compare the two affiliation strings with the python difflib SequenceMatcher, and consider any affiliations that have a similarity ratio greater than 0.7 as matching.  For example ``Berkeley'' and ``UC Berkeley'' have a ratio of 0.8, and would thus be considered matching.
@@ -89,9 +87,9 @@ This is an attempt at codifying the common-sense process one naturally takes to 
 
 As the final step, we select only the entries which are linked to the PhD thesis of interest.  Some example ADS entry network graphs are shown in Figure~\ref{fig:example_networks}.
 
-Once we have selected only those entries we believe are connected to the thesis author, we demand that at least one of the entries be in a peer-reviewed astronomy journal to eliminate physics thesis entries.  The list of publications we use to label someone as an astronomer are listed in Table~\ref{table:journal_list}. We consider an ADS listed publication to be a match if any of our selected journals are contained in the publication string, e.g., ``Astrophysical Journal Letters'' would count as a match because it contains ``Astronomical Journal'' which is in our list.  This step is necessary to remove PhD authors who would be better classified as Physicists, Geophysicists, Planetary Scientists, etc. 
+Once we have selected only those entries we believe are connected to the thesis author, we demand that at least one of the entries be in a peer-reviewed astronomy journal to eliminate Physics thesis entries.  The list of publications we use to label someone as an astronomer are listed in Table~\ref{table:journal_list}. We consider an ADS listed publication to be a match if any of our selected journals are contained in the publication string, e.g., ``Astrophysical Journal Letters'' would count as a match because it contains ``Astronomical Journal'' which is in our list.  This step is necessary to remove PhD authors who would be better classified as Physicists, Geophysicists, Planetary Scientists, etc. 
 
-We do not limit our search to only first-author publications for either the publication graph construction or determining if the author meets our criterion for being labeled an ``astronomer''. We also do not limit the query to peer-reviwed journals, thus our query results include things like conference posters and grant proposals.  We treat these results identically to journal articles when constructing the author networks. 
+We do not limit our search to only first-author publications for either the publication graph construction or determining if the author meets our criterion for being labeled an ``astronomer''. We also do not limit the query to peer-reviewed journals, thus our query results include things like conference posters and grant proposals.  We treat these results identically to journal articles when constructing the author networks. 
 
 
 The ADS publication must match at least one of:
@@ -119,7 +117,7 @@ Thus, our definition of a US PhD astronomer is effectively a person who received
 
 We record the thesis author's most recent ADS entry date (need not be a peer-reviewed paper)  and a bunch of other stuff.
 
-For each US astronomer, we query ADS to look for any other PhD articles with the same first initial and last name (from any year).  We flag the author as having a unique name if this query only returns their thesis.  The subset of potentially unique PhD names can be used to test our name disambiguation techniques.
+For each US astronomer, we query ADS to look for any other PhD articles with the same first initial and last name (from any year).  We flag the author as having a potentially unique name if this query only returns their thesis.  The subset of potentially unique PhD names can be used to test our name disambiguation techniques.
 
 One known issue is that ADS does not necessarily contain all Astronomy PhD dissertations. When we ran our code \citet{Pagnotta12} was not listed in ADS (but now appears).
 
@@ -161,7 +159,7 @@ Using the less-common name subset, we can also test for under-linking by assumin
 %  \end{figure*}
 
 
-It is worth emphasizing that while there are undoubtedly some cases where we have not accurately recorded an astronomer, we do not suffer the selection biases that go with survey-based studies and that our errors should be similar across PhD cohorts, thus we can draw strong conclusions about the relative differences between PhD classes.
+It is worth emphasizing that while there are undoubtedly some cases where we have not accurately recorded an astronomer's publication network, we do not suffer the selection biases that go with survey-based studies and that our errors should be similar across PhD cohorts.  Thus we should be able to draw strong conclusions about the relative differences between PhD classes.
 
 \section{Observations}
 
@@ -202,7 +200,7 @@ To test how much we are affected by over-linking ADS entries, we compare the ret
 
 
 
-Figure~\ref{fig:retention_curve} is particularly disturbing, less than 50\% of the 2009 to 2012 cohorts are still appearing as first authors on ADS entries. Note, these are any entries, we have not limited it to peer-reviewed papers.  This implies that most post-2008 USA-PhD astronomers now spend more time in graduate school than they do leading their own research projects post-graduation. Imagine if a corporation had a training program that lasted 3 months, and most of the employees who completed it left after 3 months post-training.  This seems an odd place in the career path to place a bottleneck.
+Figure~\ref{fig:retention_curve} is particularly disturbing, less than 50\% of the 2009 to 2012 cohorts are still appearing as first authors on ADS entries. Note, these are any entries, we have not limited it to peer-reviewed papers.  Considering most PhD programs now take 6 years to complete, this implies that most post-2008 USA-PhD astronomers spend more time in graduate school than they do leading and publishing their own research projects post-graduation. Imagine if a corporation had a training program that lasted 3 months, and most of the employees who completed it left after 3 months post-training.  This seems an odd place in the career path to place a bottleneck.
 
 There is a potential bias if authors publish as first authors on intervals longer than a year.  If that is the case, we would expect the last few points of each cohort curve in Figure~\ref{fig:retention_curve} to be slightly depressed.  XXX--go through and compute the typical time gap between linked 1st author papers.  
 
@@ -222,7 +220,7 @@ Currently, 30\% of PhDs are immediately leaving the field, double the fraction t
 
 % Another possibility is that few PhDs have first-author ADS entries every year. The cohorts from the 90's and early 00's all see marked downturns at the
 
-Note:  The curves looked weird if we included years before 1997. This could be because the job market was diffferent at that time, or it could be that ADS completeness changes. On their FAQ \footnote{\url{http://adsabs.harvard.edu/abs\_doc/faq.html}}, ADS notes they transitioned to getting abstracts directly from journals in the middle of 1995.
+% Note:  The curves looked weird if we included years before 1997. This could be because the job market was diffferent at that time, or it could be that ADS completeness changes. On their FAQ \footnote{\url{http://adsabs.harvard.edu/abs\_doc/faq.html}}, ADS notes they transitioned to getting abstracts directly from journals in the middle of 1995.
 
 
 \section{Discussion}
