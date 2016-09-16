@@ -212,7 +212,7 @@ class phd_db(object):
         ax2.set_title('USA Astro in ADS')
 
         ax_fa.set_xlim([0, 20])
-        ax_fa.set_ylim([0, 1])
+        ax_fa.set_ylim([0.2, 1])
         ax_fa.legend(numpoints=1, ncol=2)
         ax_fa.set_xlabel('Years post PhD')
         ax_fa.set_ylabel('Fraction Still 1st Authors')
