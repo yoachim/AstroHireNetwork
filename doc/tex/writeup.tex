@@ -24,14 +24,15 @@
 
 \title{Publishing Lifetimes of American Astronomy PhDs: A Post-2008 Collapse}
 
-\author{Peter Yoachim\altaffilmark{1}}, \author{XXX-add authors}, \author{author 2}, \author{author 3} 
+\author{Peter Yoachim\altaffilmark{1}}, \author{Sta\v{s}a Milojevic\altaffilmark{1}}, \author{xxx-author 2}, \author{xxx-author 3} 
   
 \altaffiltext{1}{Department of Astronomy, University of Washington, Box 351580,
 Seattle WA, 98195; {yoachim@uw.edu} }
+\altaffiltext{2}{Indiana University, Bloomington}
 
 
 \begin{abstract}
-blah blah blah, abstract
+XXX-blah blah blah, abstract
 
 \end{abstract}
 \keywords{Employment, Physics Education}
@@ -62,15 +63,19 @@ Example of current tracking here \footnote{\url{https://www.aip.org/sites/defaul
 
 All the code used for this paper is available on github\footnote{\url{https://github.com/yoachim/AstroHireNetwork}}
 
-We use the excellent {\emph{Python Module to Interact with NASA's ADS that Doesn't Suck™}}\footnote{\url{https://github.com/andycasey/ads}} to access records from the SAO/NASA Astrophysics Data System XXX--figure out proper way to cite code. 
+We use the excellent {\emph{Python Module to Interact with NASA's ADS that Doesn't Suck™}}\footnote{\url{https://github.com/andycasey/ads}} to access records from the SAO/NASA Astrophysics Data System. 
 
-Our procedure for building a database of Astronomy and Astrophysics PhDs is as follows.  We select all PhD Thesis records for a given year and screen to include only those records that have an affiliation in the United States.
+Our procedure for building a database of Astronomy and Astrophysics PhDs is as follows (throughout this paper, we use "Astronomy" and "Astrophysics" interchangeably).  We select all PhD Thesis records for a given year and screen to include only those records that have an affiliation in the United States. We automate this process by checking the institution field to see if it includes the name of a US state, or includes one of 62 strings we manually compiled (e.g., "Harvard", "Portland", "Howard", etc.). The full list of strings is available with the source code.
 
-For each US PhD, we then query ADS for all entries with the PhD author's last name and first initial with a date limit of 7 years pre-PhD to the present (we searched ADS in January, 2016). We found 8820 PhDs from 1997 to 2013, 2903 were determined to be unique Astronomy and from the USA.
+For each US PhD, we then query ADS for all entries with the PhD author's last name and first initial with a date limit of 7 years pre-PhD to the present (we searched ADS in January, 2016). XXX-justify 7 years.  We found 8820 PhDs from 1997 to 2013, 2903 were determined to be unique PhD listings of astronomers granted from USA institutions. 
+
+XXX-discuss name disambiguation earlier. 
 
 For common names (e.g.,  ``Williams, B"), our subsequent author query returns entries from multiple authors.  To try and restrict the results to only those papers with the same author as the PhD thesis, we construct a network graph of the ADS results using Networkx \citet{networkx}.
 
 There can be variations in how author names are spelled, including capitalization variations (e.g., ``VanderPlas" \citep{VanderPlas12} and ``Vanderplas" \citep{van12}) as well as variation in the presence or absence of accent characters.  To ensure we match authors correctly, we reduce all author name searches to the format ``first initial, last name'', and consider names to match if they have a Levenshtein distance less than three.
+
+XXX-note that this is a new name disambiguation scheme. Cite "Accuracy of simple, initials-based methods for author disambiguation" (http://arxiv.org/abs/1308.0749)
 
 Every ADS entry is a node in an author network. We draw an edge between nodes if they meet any of the following criteria:
 
@@ -85,11 +90,13 @@ Every ADS entry is a node in an author network. We draw an edge between nodes if
 
 For our affiliation matching, we consider the affiliations to match if one affiliation is contained in the other.  For example, ``University of Washington'' is considered a match to ``Department of Astronomy, University of Washington, Box 351580'' but not ``Washington University''.  We also compare the two affiliation strings with the python difflib SequenceMatcher, and consider any affiliations that have a similarity ratio greater than 0.7 as matching.  For example ``Berkeley'' and ``UC Berkeley'' have a ratio of 0.8, and would thus be considered matching.
 
+XXX-Run the name disambiguation on about 10 known names and say how well it performs.
+
 This is an attempt at codifying the common-sense process one naturally takes to infer if it is the same author on two papers. With authors being able to identify their papers with services such as ORCID\footnote{\url{http://orcid.org/}}, it should soon be possible to build a network of papers known to be linked to a single author as a training set for machine learning algorithms.  
 
 As the final step, we select only the entries which are linked to the PhD thesis of interest.  Some example ADS entry network graphs are shown in Figure~\ref{fig:example_networks}.
 
-Once we have selected only those entries we believe are connected to the thesis author, we demand that at least one of the entries be in a peer-reviewed astronomy journal to eliminate Physics thesis entries.  The list of publications we use to label someone as an astronomer are listed in Table~\ref{table:journal_list}. We consider an ADS listed publication to be a match if any of our selected journals are contained in the publication string, e.g., ``Astrophysical Journal Letters'' would count as a match because it contains ``Astronomical Journal'' which is in our list.  This step is necessary to remove PhD authors who would be better classified as Physicists, Geophysicists, Planetary Scientists, etc. 
+Once we have selected only those entries we believe are connected to the thesis author, we demand that at least one of the entries be in a peer-reviewed astronomy journal to eliminate Physics thesis entries. XXX-note that it's all entries, not just first author. The list of publications we use to label someone as an astronomer are listed in Table~\ref{table:journal_list}. We consider an ADS listed publication to be a match if any of our selected journals are contained in the publication string, e.g., ``Astrophysical Journal Letters'' would count as a match because it contains ``Astronomical Journal'' which is in our list.  This step is necessary to remove PhD authors who would be better classified as Physicists, Geophysicists, Planetary Scientists, etc. XXX-Do a manual test to make sure astronomy classification is working (I think all the Hubble Fellows should be AST, so that might be an easy check).
 
 We do not limit our search to only first-author publications for either the publication graph construction or determining if the author meets our criterion for being labeled an ``astronomer''. We also do not limit the query to peer-reviewed journals, thus our query results include things like conference posters and grant proposals.  We treat these results identically to journal articles when constructing the author networks. 
 
@@ -115,13 +122,13 @@ Publications of the Astronomical Society of the Pacific & PASP
 \end{deluxetable}
 
 
-Thus, our definition of a US PhD astronomer is effectively a person who received a PhD from an institution in the United States and has published at least one paper in a major peer-reviewed English-language astronomy journal.
+Thus, our definition of a US PhD astronomer is effectively a person who received a PhD from an institution in the United States and has published at least one paper in a major peer-reviewed English-language astronomy journal. XXX-move this up earlier
 
-We record the thesis author's most recent ADS entry date (need not be a peer-reviewed paper)  and a bunch of other stuff.
+We record the thesis author's most recent ADS entry date (need not be a peer-reviewed paper)  and a bunch of other stuff.XXX-clarify or delete.
 
 For each US astronomer, we query ADS to look for any other PhD articles with the same first initial and last name (from any year).  We flag the author as having a potentially unique name if this query only returns their thesis.  The subset of potentially unique PhD names can be used to test our name disambiguation techniques.
 
-One known issue is that ADS does not necessarily contain all Astronomy PhD dissertations. When we ran our code \citet{Pagnotta12} was not listed in ADS (but now appears).
+One known issue is that ADS does not necessarily contain all Astronomy PhD dissertations. When we ran our code \citet{Pagnotta12} was not listed in ADS (but now appears). XXX-put this earlier, note that it's not expected to be a large effect.
 
 
 \begin{figure*}
@@ -137,6 +144,8 @@ One known issue is that ADS does not necessarily contain all Astronomy PhD disse
 
 % Do any of those Williams papers overlap? NO not a one! Wow. Must be using middle initials.
 
+XXX--maybe put this in an appendix and just have a brief discussion on why we trust the name disambiguation.
+
 Possible ways we could fail to recognize an author has published for as long as they actually have (i.e., networks are under-linked) If an Astronomer:
 \begin{itemize}
 \item{simultaneously changes institution and area of study}
@@ -146,14 +155,13 @@ Possible ways we could fail to recognize an author has published for as long as 
 
 Ways we could mistakenly claim an author has published for longer than they actually have, we construct networks which suffer from over-linking, if two authors have similar names and:
 \begin{itemize}
-\item{overlap at the same institution}
-\item{similar reference lists in their papers}
+  \item{overlap at the same institution}
   \item{similarly named co-authors}
 \end{itemize}
 
 Thus there are two types of errors that can skew our results, over-linking our networks, connecting ADS entries that are not actually by the same author and under-linking, where we fail to recognize entries that are by the same author.  To look for the effects of over- and under-linking, we flag authors where the ADS database only lists one PhD thesis as matching their last name, and first initial. These represent less-common names that should suffer much lower rates of over-linking. Figure~\ref{fig:example_networks} panels (a) and (b) show authors with unique names. These two network clouds suffer from no over-linking and a very low level of under-linking that does not hinder our ability to correctly measure the last year the authors had a first-author entry.  Figure~\ref{fig:underlinked} shows an example network cloud where the under-linking is severe enough to make us incorrectly assume the author is no longer active as a first author.
 
-Using the less-common name subset, we can also test for under-linking by assuming the names are unique and all the ADS entries returned for a name search should be linked.  We find little evidence of under-linking. Comparing the less-common name results changes the retention rate by only $\sim4$\%. When we test for under-linking, we find recent PhDs could be suffering from under-linking at the 5-8\% level, while older PhDs suffer under-linking at lower rates (2-4\%).  This should be slightly expected, as younger astronomers have typically change institutions more recently, and many will have not yet published papers that link back to their previously established paper network cloud.  The important point is that the relative over- and under-linking between PhD cohorts is similar.  Thus, the recent dramatic (20\%) drop we observe in astronomer retention is real and not an artifact of how we assign ADS entries to authors.
+Using the less-common name subset, we can also test for under-linking by assuming the names are unique and all the ADS entries returned for a name search should be linked.  We find little evidence of under-linking. Comparing the less-common name results changes the retention rate by only $\sim4$\%. When we test for under-linking, we find recent PhDs could be suffering from under-linking at the 5-8\% level, while older PhDs suffer under-linking at lower rates (2-4\%).  This should be slightly expected, as younger astronomers have typically change institutions more recently, and many will have not yet published papers that link back to their previously established paper network cloud.  The important point is that the relative over- and under-linking between PhD cohorts is similar.  Thus, the recent dramatic (20\%) drop we observe in astronomer retention is real and not an artifact of how we assign ADS entries to authors. XXX-odd place to spill the main point of the paper.
 
 %\begin{figure*}
 %  \plotone{../../plots/span_linkCheck.pdf}
@@ -163,7 +171,9 @@ Using the less-common name subset, we can also test for under-linking by assumin
 
 It is worth emphasizing that while there are undoubtedly some cases where we have not accurately recorded an astronomer's publication network, we do not suffer the selection biases that go with survey-based studies and that our errors should be similar across PhD cohorts.  Thus we should be able to draw strong conclusions about the relative differences between PhD classes.
 
-\section{Observations}
+\section{Results}
+
+XXX-introduce retention curves (and say why this is better than the silly replacement factor that I think I cite later.)
 
 To test how much we are affected by over-linking ADS entries, we compare the retention curves of all astronomers to those with unique PhD names.  xxx-should also then take the unique names and see how it changes if I use the last entry rather than the last linked entry.
 
