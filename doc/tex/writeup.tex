@@ -130,6 +130,10 @@ For each US astronomer, we query ADS to look for any other PhD articles with the
 
 One known issue is that ADS does not necessarily contain all Astronomy PhD dissertations. When we ran our code \citet{Pagnotta12} was not listed in ADS (but now appears). XXX-put this earlier, note that it's not expected to be a large effect.
 
+% code in check_hubble.py
+To test our author linking algorithm, we take the list of Hubble Fellows\footnote{\url{http://www.stsci.edu/institute/smo/fellowships/hubble/fellows-list/}} and manually trim the list down to those from US institutions.  We expect all of these individuals should be in our ADS database. We find we can match 147 of 168 Hubble Fellows (87.5\%).  The 21 Hubble Fellows who failed to match span all the relevant years, and failed for a variety of reasons. For example, ADS lists Jose Preito's PhD as \citet{Katunaric09}. Other authors fail to be identified as astronomers, or fail to link to their full publication network. However, we find it promising that we appear to correctly recover 87\% of known astronomers with no particular biases (e.g., we are not biased against certain years or institutions). 
+
+
 
 \begin{figure*}
   \plottwo{../../new_plots/single_example_network_0.pdf}{../../new_plots/single_example_network_1.pdf}\\
