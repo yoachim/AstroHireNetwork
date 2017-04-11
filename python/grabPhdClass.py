@@ -7,6 +7,22 @@ import datetime
 from sklearn.feature_extraction.text import TfidfVectorizer
 from leven import levenshtein
 
+
+def hindex(citations):
+    """
+    Return the h-index from a list of citations counts
+    """
+    citations = np.sort(citations)[::-1]
+    indx = np.arange(citations.size)
+    diff = citations - indx
+    good = np.where(diff > 0)[0]
+    if good.size == 0:
+        result = 0
+    else:
+        result = np.max(good) + 1
+    return result
+
+
 def checkUSAff(affil):
     """
     Check if an affiliation is in the USA.
@@ -316,7 +332,7 @@ def authorsPapers(author, years=None):
     result = []
     fl = ['aff', 'pub', 'abstract', 'author', 'first_author',
           'bibcode', 'keyword', 'year', 'title', 'orcid_pub',
-          'orcid_user','orcid_other']
+          'orcid_user','orcid_other', 'citation_count']
     try:
         if years is not None:
             result.extend(list(ads.SearchQuery(q='year:%s'%years, author=author,
@@ -352,7 +368,7 @@ def phdArticle2row(phdArticle, yearsPrePhD=7, verbose=False, checkUSA=True,
                   'latest aff', 'latest 1st year',
                   'latest 1st aff', 'largest publication gap',
                   'numRecords','numLinked', 'uniqueName', 'latest year unlinked',
-                  'noAstroJournal', 'nonUS']
+                  'noAstroJournal', 'nonUS', 'hindex']
 
     if justKeys:
         return resultKeys
@@ -399,7 +415,8 @@ def phdArticle2row(phdArticle, yearsPrePhD=7, verbose=False, checkUSA=True,
                                             authSimple(phdArticle.author[0]))
 
     # Check if the
-
+    citations = [paper.citation_count for paper in linkedPapers]
+    result['hindex'] = hindex(citations)
 
     if returnLinkedPapers:
         return linkedPapers
