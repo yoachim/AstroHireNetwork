@@ -27,6 +27,10 @@ def restore_db():
 
 astro_df, data_df = restore_db()
 
+fl = ['aff', 'pub', 'abstract', 'author', 'first_author',
+          'bibcode', 'keyword', 'year', 'title', 'orcid_pub',
+          'orcid_user','orcid_other', 'citation_count', 'pubdate']
+
 years = np.arange(1997, 2014)
 for year in years:
     new_rows = {}
@@ -37,7 +41,7 @@ for year in years:
     for j, bibcode in enumerate(astro_df.loc[astro_df['phd_year'] == year]['phd_bibcode']):
         for i in range(4):
             try:
-                phdA = list(ads.SearchQuery(bibcode=bibcode))
+                phdA = list(ads.SearchQuery(bibcode=bibcode, fl=fl))
                 row = phdArticle2row(phdA[0])
                 for key in keys:
                     new_rows[key].append(row[key])
