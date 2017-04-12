@@ -161,7 +161,10 @@ def authorGroup(articleList, anchorArticle, anchorAuthor,
         else:
             abstracts.append('')
         if hasattr(paper,'title'):
-            titles.append(paper.title[0])
+            if paper.title is not None:
+                titles.append(paper.title[0])
+            else:
+                titles.append('')
         else:
             titles.append('')
     vect = TfidfVectorizer(min_df=1)
@@ -368,7 +371,7 @@ def phdArticle2row(phdArticle, yearsPrePhD=7, verbose=False, checkUSA=True,
                   'latest aff', 'latest 1st year',
                   'latest 1st aff', 'largest publication gap',
                   'numRecords','numLinked', 'uniqueName', 'latest year unlinked',
-                  'noAstroJournal', 'nonUS', 'hindex']
+                  'noAstroJournal', 'nonUS', 'hindex', '1st auth hindex']
 
     if justKeys:
         return resultKeys
@@ -481,6 +484,8 @@ def phdArticle2row(phdArticle, yearsPrePhD=7, verbose=False, checkUSA=True,
 
     allYears = [int(paper.year) for paper in paperList if hasattr(paper,'year')]
     result['latest year unlinked'] = np.max(allYears)
+    citations = [paper.citation_count for paper in linked1stA]
+    result['1st auth hindex'] = hindex(citations)
 
     # Test to see if this is the only person with this name and a phd in astro
     ack = list(ads.query('bibstem:"*PhDT", author:"%s"' % authSimple(phdArticle.author[0]),
@@ -488,7 +493,12 @@ def phdArticle2row(phdArticle, yearsPrePhD=7, verbose=False, checkUSA=True,
     titles = []
     if len(ack) > 1:
         # Make sure the titles are different
-        titles = set([paper.title[0].lower() for paper in ack if hasattr(paper, 'title')])
+        for paper in ack:
+            if hasattr(paper, 'title'):
+                if paper.title is not None:
+                    titles.append(paper.title[0].lower())
+        titles = set(titles)
+        # titles = set([paper.title[0].lower() for paper in ack if hasattr(paper, 'title')])
     if len(titles) > 1:
         if verbose:
             print authSimple(phdArticle.author[0])+' returns multiple PhDT.'
